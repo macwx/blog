@@ -180,7 +180,7 @@
             />
           </div>
           <!-- 回复框 -->
-          <Reply ref="reply" @reloadReply="reloadReply" />
+          <Reply :type="type" ref="reply" @reloadReply="reloadReply" />
         </div>
       </div>
       <!-- 加载按钮 -->
@@ -209,19 +209,21 @@ export default {
     Paging
   },
   props: {
-    commentList: {
-      type: Array
-    },
-    count: {
+    type: {
       type: Number
     }
+  },
+  created() {
+    this.listComments();
   },
   data: function() {
     return {
       reFresh: true,
       commentContent: "",
       chooseEmoji: false,
-      current: 1
+      current: 1,
+      commentList: [],
+      count: 0
     };
   },
   methods: {
@@ -266,16 +268,36 @@ export default {
         });
     },
     listComments() {
-      //查看下一页评论
-      this.current++;
+      //查看评论
       const path = this.$route.path;
       const arr = path.split("/");
+      var param = {
+        current: this.current,
+        type: this.type
+      };
+      switch (this.type) {
+        case 1:
+          param.articleId = arr[2];
+          break;
+        case 3:
+          param.talkId = arr[2];
+          break;
+        default:
+          break;
+      }
       this.axios
         .get("/api/comments", {
-          params: { current: this.current, articleId: arr[2] }
+          params: param
         })
         .then(({ data }) => {
-          this.commentList.push(...data.data.recordList);
+          if (this.current == 1) {
+            this.commentList = data.data.recordList;
+          } else {
+            this.commentList.push(...data.data.recordList);
+          }
+          this.current++;
+          this.count = data.data.count;
+          this.$emit("getCommentCount", this.count);
         });
     },
     insertComment() {
@@ -295,21 +317,32 @@ export default {
         return (
           "<img src= '" +
           EmojiList[str] +
-          "' width='22'height='20' style='padding: 0 1px'/>"
+          "' width='24'height='24' style='margin: 0 1px;vertical-align: text-bottom'/>"
         );
       });
       //发送请求
       const path = this.$route.path;
       const arr = path.split("/");
       var comment = {
-        articleId: arr[2],
-        commentContent: this.commentContent
+        commentContent: this.commentContent,
+        type: this.type
       };
+      switch (this.type) {
+        case 1:
+          comment.articleId = arr[2];
+          break;
+        case 3:
+          comment.talkId = arr[2];
+          break;
+        default:
+          break;
+      }
       this.commentContent = "";
       this.axios.post("/api/comments", comment).then(({ data }) => {
         if (data.flag) {
-          //查询最新评论
-          this.$emit("reloadComment");
+          // 查询最新评论
+          this.current = 1;
+          this.listComments();
           const isReview = this.$store.state.blogInfo.websiteConfig
             .isCommentReview;
           if (isReview) {
@@ -382,9 +415,6 @@ export default {
 </script>
 
 <style scoped>
-p {
-  margin-bottom: 1.25rem !important;
-}
 .blogger-tag {
   background: #ffa51e;
   font-size: 12px;
@@ -455,6 +485,7 @@ p {
   font-size: 0.875rem;
   line-height: 1.75;
   padding-top: 0.625rem;
+  white-space: pre-line;
   word-wrap: break-word;
   word-break: break-all;
 }

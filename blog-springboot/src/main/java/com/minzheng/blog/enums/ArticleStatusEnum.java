@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 文章状态美剧
+ * 文章状态枚举
  *
  * @author yezhiqiu
  * @date 2021/08/10

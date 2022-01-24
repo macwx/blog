@@ -51,6 +51,11 @@ public class CommentBackDTO {
     private String commentContent;
 
     /**
+     * 评论类型
+     */
+    private Integer type;
+
+    /**
      * 是否审核
      */
     private Integer isReview;

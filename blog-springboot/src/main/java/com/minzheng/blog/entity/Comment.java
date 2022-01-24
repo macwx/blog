@@ -33,10 +33,16 @@ public class Comment {
      */
     private Integer userId;
 
+
     /**
      * 回复用户id
      */
     private Integer replyUserId;
+
+    /**
+     * 评论说说id
+     */
+    private Integer talkId;
 
     /**
      * 评论文章id
@@ -52,6 +58,11 @@ public class Comment {
      * 父评论id
      */
     private Integer parentId;
+
+    /**
+     * 评论类型 1.文章 2.友链 3.说说
+     */
+    private Integer type;
 
     /**
      * 是否审核
