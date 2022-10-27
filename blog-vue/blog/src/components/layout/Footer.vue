@@ -53,9 +53,10 @@ export default {
 <style scoped>
 .footer-wrap {
   width: 100%;
+  margin-top: 10px;
   line-height: 1.5;
   position: relative;
-  padding: 30px 20px;
+  padding: 20px 20px;
   color: #eee;
   font-size: 14px;
   text-align: center;
