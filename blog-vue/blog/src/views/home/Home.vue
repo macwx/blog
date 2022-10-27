@@ -122,7 +122,7 @@
             <div class="author-wrapper">
               <!-- 博主头像 -->
               <v-avatar size="110">
-                <img
+                  <img
                   class="author-avatar"
                   :src="blogInfo.websiteConfig.websiteAvatar"
                 />
@@ -200,6 +200,18 @@
               {{ blogInfo.websiteConfig.websiteNotice }}
             </div>
           </v-card>
+
+          <!-- 摸鱼日历 -->
+          <v-card class="blog-card animated zoomIn mt-5 big">
+            <div class="web-info-title">
+              <v-icon size="18">mdi-lifebuoy</v-icon>
+              摸鱼日历
+            </div>
+            <div>
+              <v-img :src="moyuPic" />
+            </div>
+          </v-card>
+
           <!-- 网站信息 -->
           <v-card class="blog-card animated zoomIn mt-5">
             <div class="web-info-title">
@@ -238,6 +250,7 @@ export default {
     this.init();
     this.listHomeTalks();
     this.timer = setInterval(this.runTime, 1000);
+    this.initMoyuPic();
   },
   data: function() {
     return {
@@ -254,6 +267,7 @@ export default {
         sentencePause: true
       },
       articleList: [],
+      moyuPic: "",
       talkList: [],
       current: 1
     };
@@ -300,6 +314,17 @@ export default {
       str += day.getMinutes() + "分";
       str += day.getSeconds() + "秒";
       this.time = str;
+    },
+    initMoyuPic() {
+      this.axios
+        .get("https://api.vvhan.com/api/moyu", {
+          params: {
+            type: "json"
+          }
+        })
+        .then(({ data }) => {
+          this.moyuPic = data.url;
+        });
     },
     infiniteHandler($state) {
       let md = require("markdown-it")();
