@@ -37,7 +37,7 @@ public class MessageController {
      * @param messageVO 留言信息
      * @return {@link Result<>}
      */
-    @AccessLimit(seconds = 60, maxCount = 1)
+    @AccessLimit(seconds = 10, maxCount = 1)
     @ApiOperation(value = "添加留言")
     @PostMapping("/messages")
     public Result<?> saveMessage(@Valid @RequestBody MessageVO messageVO) {

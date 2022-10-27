@@ -168,20 +168,25 @@
             </el-col>
           </el-row>
           <el-form-item label="默认文章封面">
-            <el-upload
-              class="cover-uploader"
-              action="/api/admin/config/images"
-              :before-upload="beforeUpload"
-              :show-file-list="false"
-              :on-success="handleArticleCoverSuccess"
-            >
+<!--            <el-upload-->
+<!--              class="cover-uploader"-->
+<!--              action="/api/admin/config/images"-->
+<!--              :before-upload="beforeUpload"-->
+<!--              :show-file-list="false"-->
+<!--              :on-success="handleArticleCoverSuccess"-->
+<!--            >-->
               <img
                 v-if="websiteConfigForm.articleCover"
                 :src="websiteConfigForm.articleCover"
                 class="cover"
               />
-              <i v-else class="el-icon-plus cover-uploader-icon" />
-            </el-upload>
+<!--              <i v-else class="el-icon-plus cover-uploader-icon" />-->
+<!--            </el-upload>-->
+            <el-input
+                v-model="websiteConfigForm.articleCover"
+                size="small"
+                style="width:400px"
+            />
           </el-form-item>
           <el-form-item label="邮箱通知">
             <el-radio-group v-model="websiteConfigForm.isEmailNotice">

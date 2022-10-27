@@ -213,7 +213,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
         // 设定默认文章封面
         if (StrUtil.isBlank(article.getArticleCover())){
             try {
-                article.setArticleCover(webConfig.get().getArticleCover());
+                article.setArticleCover(webConfig.get().getArticleCover()+"&time="+CommonUtils.getRandomCode());
             } catch (Exception e) {
                 throw new BizException("设定默认文章封面失败");
             }

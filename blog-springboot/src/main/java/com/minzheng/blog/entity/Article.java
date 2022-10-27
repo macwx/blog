@@ -26,7 +26,7 @@ public class Article {
     /**
      * id
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.INPUT)
     private Integer id;
 
     /**

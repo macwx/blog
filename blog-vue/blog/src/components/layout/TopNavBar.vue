@@ -22,11 +22,7 @@
         </router-link>
       </div>
       <div class="float-right nav-title">
-        <div class="menus-item">
-          <a class="menu-btn" @click="openSearch">
-            <i class="iconfont iconsousuo" /> 搜索
-          </a>
-        </div>
+
         <div class="menus-item">
           <router-link class="menu-btn" to="/">
             <i class="iconfont iconzhuye" /> 首页
@@ -57,7 +53,7 @@
         </div>
         <div class="menus-item">
           <a class="menu-btn">
-            <i class="iconfont iconqita" /> 娱乐
+            <i class="iconfont iconqita" /> 杂谈
             <i class="iconfont iconxiangxia2 expand" />
           </a>
           <ul class="menus-submenu">
@@ -114,6 +110,11 @@
               </li>
             </ul>
           </template>
+        </div>
+        <div class="menus-item">
+          <a class="menu-btn" @click="openSearch">
+            <i class="iconfont iconsousuo" /> 搜索
+          </a>
         </div>
       </div>
     </div>

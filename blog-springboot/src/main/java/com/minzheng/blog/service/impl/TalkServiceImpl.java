@@ -51,10 +51,21 @@ public class TalkServiceImpl extends ServiceImpl<TalkDao, Talk> implements TalkS
                         .orderByDesc(Talk::getId)
                         .last("limit 10"))
                 .stream()
-                .map(item -> item.getContent().length() > 200 ? HTMLUtils.deleteHMTLTag(item.getContent().substring(0, 200)) : HTMLUtils.deleteHMTLTag(item.getContent()))
+//                .map(item -> item.getContent().length() > 50 ? HTMLUtils.deleteHMTLTag(item.getContent().substring(0, 50)) : HTMLUtils.deleteHMTLTag(item.getContent()))
+                .map(item ->{
+                    String content;
+                    if (item.getContent().length()>45){
+                        content = HTMLUtils.deleteHMTLTag(item.getContent().substring(0, 45)+"...");
+                    }else {
+                        content = HTMLUtils.deleteHMTLTag(item.getContent());
+                    }
+                    if (content.contains("\n")){
+                        content = content.split("\\n")[0];
+                    }
+                    return content;
+                })
                 .collect(Collectors.toList());
     }
-
     @Override
     public PageResult<TalkDTO> listTalks() {
         // 查询说说总量
