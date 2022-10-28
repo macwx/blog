@@ -5,6 +5,7 @@ import com.minzheng.blog.dto.*;
 import com.minzheng.blog.entity.Article;
 import com.minzheng.blog.vo.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -74,7 +75,7 @@ public interface ArticleService extends IService<Article> {
      *
      * @param articleId 文章id
      */
-    void saveArticleLike(Integer articleId);
+    void saveArticleLike(Integer articleId, HttpServletRequest request);
 
     /**
      * 添加或修改文章

@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
 import java.util.*;
@@ -181,9 +182,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
 
 
     @Override
-    public void saveArticleLike(Integer articleId) {
+    public void saveArticleLike(Integer articleId, HttpServletRequest request) {
+        String sessionId = request.getSession().getId();
+        System.out.println(sessionId);
         // 判断是否点赞
-        String articleLikeKey = ARTICLE_USER_LIKE + UserUtils.getLoginUser().getUserInfoId();
+        String articleLikeKey = ARTICLE_USER_LIKE +sessionId;
         if (redisService.sIsMember(articleLikeKey, articleId)) {
             // 点过赞则删除文章id
             redisService.sRemove(articleLikeKey, articleId);

@@ -201,16 +201,7 @@
             </div>
           </v-card>
 
-          <!-- 摸鱼日历 -->
-          <v-card class="blog-card animated zoomIn mt-5 big">
-            <div class="web-info-title">
-              <v-icon size="18">mdi-lifebuoy</v-icon>
-              摸鱼日历
-            </div>
-            <div>
-              <v-img :src="moyuPic" />
-            </div>
-          </v-card>
+
 
           <!-- 网站信息 -->
           <v-card class="blog-card animated zoomIn mt-5">
@@ -229,6 +220,12 @@
               </div>
             </div>
           </v-card>
+
+          <!-- 摸鱼日历 -->
+          <v-card class="mt-5" v-click-outside>
+            <v-img :src="moyuPic" @click="preview()" />
+          </v-card>
+
         </div>
       </v-col>
     </v-row>
@@ -325,6 +322,15 @@ export default {
         .then(({ data }) => {
           this.moyuPic = data.url;
         });
+    },
+    preview() {
+      let pic_images = [this.moyuPic];
+      this.$imagePreview({
+        showIndex: true,
+        loop: false,
+        images: pic_images,
+        index: 0
+      });
     },
     infiniteHandler($state) {
       let md = require("markdown-it")();

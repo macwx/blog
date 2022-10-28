@@ -7,6 +7,7 @@ import com.minzheng.blog.dto.ReplyDTO;
 import com.minzheng.blog.entity.Comment;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -44,8 +45,9 @@ public interface CommentService extends IService<Comment> {
      * 点赞评论
      *
      * @param commentId 评论id
+     * @param request 请求头信息
      */
-    void saveCommentLike(Integer commentId);
+    void saveCommentLike(Integer commentId, HttpServletRequest request);
 
     /**
      * 审核评论

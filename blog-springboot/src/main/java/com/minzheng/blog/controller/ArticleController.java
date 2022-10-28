@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -198,8 +199,8 @@ public class ArticleController {
     @ApiOperation(value = "点赞文章")
     @ApiImplicitParam(name = "articleId", value = "文章id", required = true, dataType = "Integer")
     @PostMapping("/articles/{articleId}/like")
-    public Result<?> saveArticleLike(@PathVariable("articleId") Integer articleId) {
-        articleService.saveArticleLike(articleId);
+    public Result<?> saveArticleLike(@PathVariable("articleId") Integer articleId, HttpServletRequest request) {
+        articleService.saveArticleLike(articleId,request);
         return Result.ok();
     }
 

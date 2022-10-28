@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -76,8 +77,8 @@ public class CommentController {
      */
     @ApiOperation(value = "评论点赞")
     @PostMapping("/comments/{commentId}/like")
-    public Result<?> saveCommentLike(@PathVariable("commentId") Integer commentId) {
-        commentService.saveCommentLike(commentId);
+    public Result<?> saveCommentLike(@PathVariable("commentId") Integer commentId, HttpServletRequest request) {
+        commentService.saveCommentLike(commentId,request);
         return Result.ok();
     }
 

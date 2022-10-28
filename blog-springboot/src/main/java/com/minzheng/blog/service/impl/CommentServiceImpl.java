@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -141,9 +142,11 @@ public class CommentServiceImpl extends ServiceImpl<CommentDao, Comment> impleme
     }
 
     @Override
-    public void saveCommentLike(Integer commentId) {
+    public void saveCommentLike(Integer commentId, HttpServletRequest request) {
+        String sessionId = request.getSession().getId();
+        System.out.println(sessionId);
         // 判断是否点赞
-        String commentLikeKey = COMMENT_USER_LIKE + UserUtils.getLoginUser().getUserInfoId();
+        String commentLikeKey = COMMENT_USER_LIKE + sessionId;
         if (redisService.sIsMember(commentLikeKey, commentId)) {
             // 点过赞则删除评论id
             redisService.sRemove(commentLikeKey, commentId);
