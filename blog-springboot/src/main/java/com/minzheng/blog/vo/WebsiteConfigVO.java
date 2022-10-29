@@ -65,6 +65,12 @@ public class WebsiteConfigVO {
     private String websiteRecordNo;
 
     /**
+     * 网站备案号
+     */
+    @ApiModelProperty(name = "websiteAddress", value = "网站地址", required = true, dataType = "String")
+    private String websiteAddress;
+
+    /**
      * 社交登录列表
      */
     @ApiModelProperty(name = "socialLoginList", value = "社交登录列表", required = true, dataType = "List<String>")

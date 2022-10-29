@@ -69,6 +69,15 @@
               style="width:400px"
             />
           </el-form-item>
+
+          <el-form-item label="网站地址">
+            <el-input
+              v-model="websiteConfigForm.websiteAddress"
+              size="small"
+              style="width:400px"
+            />
+          </el-form-item>
+
           <el-form-item label="第三方登录">
             <el-checkbox-group v-model="websiteConfigForm.socialLoginList">
               <el-checkbox label="qq">QQ</el-checkbox>
@@ -300,6 +309,7 @@ export default {
         websiteNotice: "",
         websiteCreateTime: null,
         websiteRecordNo: "",
+        websiteAddress: "",
         socialLoginList: [],
         socialUrlList: [],
         qq: "",
