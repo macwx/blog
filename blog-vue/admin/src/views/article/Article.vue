@@ -43,31 +43,31 @@
         <!-- 文章分类 -->
         <el-form-item label="文章分类">
           <el-tag
-              type="success"
-              v-show="article.categoryName"
-              style="margin:0 1rem 0 0"
-              :closable="true"
-              @close="removeCategory"
+`            type="success"
+            v-show="article.categoryName"
+            style="margin:0 1rem 0 0"
+            :closable="true"
+            @close="removeCategory"
           >
             {{ article.categoryName }}
           </el-tag>
           <!-- 分类选项 -->
           <el-popover
-              placement="bottom-start"
-              width="460"
-              trigger="click"
-              v-if="!article.categoryName"
+            placement="bottom-start"
+            width="460"
+            trigger="click"
+            v-if="!article.categoryName"
           >
             <div class="popover-title">分类</div>
             <!-- 搜索框 -->
             <el-autocomplete
-                style="width:100%"
-                v-model="categoryName"
-                :fetch-suggestions="searchCategories"
-                placeholder="请输入分类名搜索，enter可添加自定义分类"
-                :trigger-on-focus="false"
-                @keyup.enter.native="saveCategory"
-                @select="handleSelectCategories"
+              style="width:100%"
+              v-model="categoryName"
+              :fetch-suggestions="searchCategories"
+              placeholder="请输入分类名搜索，enter可添加自定义分类"
+              :trigger-on-focus="false"
+              @keyup.enter.native="saveCategory"
+              @select="handleSelectCategories"
             >
               <template slot-scope="{ item }">
                 <div>{{ item.categoryName }}</div>
@@ -76,10 +76,10 @@
             <!-- 分类 -->
             <div class="popover-container">
               <div
-                  v-for="item of categoryList"
-                  :key="item.id"
-                  class="category-item"
-                  @click="addCategory(item)"
+                v-for="item of categoryList"
+                :key="item.id"
+                class="category-item"
+                @click="addCategory(item)"
               >
                 {{ item.categoryName }}
               </div>

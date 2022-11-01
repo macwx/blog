@@ -102,7 +102,7 @@
 	 JOIN tb_tag t ON t.id = atg.tag_id
 	 ORDER BY
 	   a.is_top DESC,
-	   a.id DESC
+	   a.create_time DESC
     </select>
 
     <select id="listArticlesByCondition" resultMap="articlePreviewResultMap">
