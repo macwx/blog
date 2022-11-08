@@ -8,9 +8,7 @@
 ## 博客介绍
 
 <p align=center>
-  <a href="https://www.talkxj.com">
-    <img src="https://static.talkxj.com/articles/4a8ca439f6a4cce8316f9a885c632cee.jpg" alt="风丶宇的个人博客" style="border-radius: 50%">
-  </a>
+    本博客是参考[风丶宇](http://https://www.talkxj.com) 大佬的博客更新而成，感谢大佬提供的页面，然后根据个人喜好新增部分功能，是个非常值得新手入门学习的demo规范化编程案例！
 </p>
 
 <p align=center>
@@ -35,15 +33,14 @@
 
 ## 在线地址
 
-**项目链接：** [www.talkxj.com](https://www.talkxj.com)
+**项目链接：** [https://www.macw.cc/](https://www.macw.cc)
 
-**后台链接：** [admin.talkxj.com](https://admin.talkxj.com)
+**后台链接：** [blog.macw.cc](https://blog.macw.cc)
 
 测试账号：test@qq.com，密码：1234567，可登入后台查看。
 
-**Github地址：** [https://github.com/X1192176811/blog](https://github.com/X1192176811/blog)
 
-**Gitee地址：** [https://gitee.com/feng_meiyu/blog](https://gitee.com/feng_meiyu/blog)
+**Gitee地址：** [https://gitee.com/macw/blog](https://gitee.com/macw/blog)
 
 **在线接口文档地址：** [https://www.talkxj.com/api/doc.html](https://www.talkxj.com/api/doc.html)
 
