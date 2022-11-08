@@ -37,7 +37,7 @@
 
 **后台链接：** [blog.macw.cc](https://blog.macw.cc)
 
-测试账号：test@qq.com，密码：1234567，可登入后台查看。
+测试账号：admin@qq.com，密码：1234567，可登入后台查看。
 
 
 **Gitee地址：** [https://gitee.com/macw/blog](https://gitee.com/macw/blog)
