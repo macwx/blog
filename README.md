@@ -1,35 +1,17 @@
-## 更新内容
-- 1、新增图片接口自动获取
 
 
+## 基于Springboot + Vue 开发的前后端分离博客
 
 
 
 ## 博客介绍
 
-<p align=center>
-    本博客是参考[风丶宇](http://https://www.talkxj.com) 大佬的博客更新而成，感谢大佬提供的页面，然后根据个人喜好新增部分功能，是个非常值得新手入门学习的demo规范化编程案例！
+<p >
+    本博客是参考 [风丶宇] 大佬的博客更新而成，感谢大佬提供的页面，然后定制新增部分功能，是个非常值得新手入门学习的Java规范化编程案例！
 </p>
 
-<p align=center>
-   基于Springboot + Vue 开发的前后端分离博客
-</p>
 
-<p align="center">
-   <a target="_blank" href="https://github.com/X1192176811/blog">
-      <img src="https://img.shields.io/hexpm/l/plug.svg"/>
-      <img src="https://img.shields.io/badge/JDK-1.8+-green.svg"/>
-      <img src="https://img.shields.io/badge/springboot-2.4.2.RELEASE-green"/>
-      <img src="https://img.shields.io/badge/vue-2.5.17-green"/>
-      <img src="https://img.shields.io/badge/mysql-8.0.20-green"/>
-      <img src="https://img.shields.io/badge/mybatis--plus-3.4.0-green"/>
-      <img src="https://img.shields.io/badge/redis-6.0.5-green"/>
-      <img src="https://img.shields.io/badge/elasticsearch-7.9.2-green"/>
-      <img src="https://img.shields.io/badge/rabbitmq-3.8.5-green"/>
-   </a>
-</p>
 
-[在线地址](#在线地址) | [目录结构](#目录结构) | [项目特点](#项目特点) | [技术介绍](#技术介绍) | [运行环境](#运行环境) | [开发环境](#开发环境) | [项目截图](#项目截图) | [快速开始](#快速开始) | [注意事项](#注意事项) | [项目总结](#项目总结) | [交流群](#交流群)
 
 ## 在线地址
 
@@ -37,16 +19,38 @@
 
 **后台链接：** [blog.macw.cc](https://blog.macw.cc)
 
-测试账号：admin@qq.com，密码：1234567，可登入后台查看。
+测试账号：test@qq.com，密码：1234567，可登入后台查看。
 
 
 **Gitee地址：** [https://gitee.com/macw/blog](https://gitee.com/macw/blog)
 
-**在线接口文档地址：** [https://www.talkxj.com/api/doc.html](https://www.talkxj.com/api/doc.html)
+**在线接口文档地址：** [https://www.macw.cc/api/doc.html](https://www.macw.cc/api/doc.html)
 
 您的star是我坚持的动力，感谢大家的支持，欢迎提交pr共同改进项目。
 
-## 目录结构
+## 更新内容
+- 更新博客图片为接口自动刷新获取
+- 说说首页滚动框优化，截取第一行前n个字符展示
+- 优化部分页面样式，新增部分自动化接口调用
+- 首页右下角新增[摸鱼日历]接口等
+- 后台系统配置更新
+- 添加个人网盘菜单
+- 点赞功能更新为无需登录点赞，通过cookie刷新记录
+- 游客头像取消默认黑白，改为自动刷新
+- 友链页面优化，添加博客地址说明等
+
+## 后续更新计划
+- 更新违禁词校验检测功能，现在校验太严格
+- 添加博客文章页面，可以添加附件功能等
+- 添加微信公众号菜单配置功能
+- 添加百度收录SEO等
+- 添加博客页面广告接入，后台配置等
+- 博客首页多主题配置等
+
+敬请期待。。。。。。。。。。。。。。。。。。
+
+
+## 系统目录结构
 
 前端项目位于blog-vue下，blog为前台，admin为后台。
 
@@ -143,7 +147,7 @@ blog-springboot
 
 ## 项目截图
 
-![QQ截图20210320171133.png](https://static.talkxj.com/articles/1616231666692.png)
+![img.png](pic/img.png)
 
 ![QQ截图20210320235519 1.jpg](https://static.talkxj.com/articles/1616255938601.jpg)
 
@@ -175,9 +179,11 @@ blog-springboot
 
 博客作为新手入门项目是十分不错的，项目所用的技术栈覆盖的也比较广，适合初学者学习。主要难点在于权限管理、第三方登录、websocket这块。做的不好的地方请大家见谅，有问题的或者有好的建议可以私聊联系我。
 
-## 交流群
+## 交流QQ
 
-![博客技术交流群聊二维码.png](https://static.talkxj.com/articles/1594437310326.png)
+1055215129@qq.com
+
+欢迎各位大佬发邮箱进行博客问题沟通，也欢迎各位去博客留言页进行留言，每一条留言我都会认真看并且回复，感谢支持！！！
 
 
 

@@ -70,6 +70,24 @@
           </ul>
         </div>
         <div class="menus-item">
+          <a class="menu-btn">
+            <i class="iconfont iconhanbao" /> 网盘
+            <i class="iconfont iconxiangxia2 expand" />
+          </a>
+          <ul class="menus-submenu">
+            <li>
+              <a href="https://cloud.henaumcw.top/" target="_blank">
+                <i class="iconfont iconhanbao" /> Cloud
+              </a>
+            </li>
+            <li>
+              <a href="https://yun.macw.cc/" target="_blank">
+                <i class="iconfont iconhanbao" /> File
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="menus-item">
           <router-link class="menu-btn" to="/links">
             <i class="iconfont iconlianjie" /> 友链
           </router-link>
