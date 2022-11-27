@@ -5,11 +5,9 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.minzheng.blog.common.SqlConf;
 import com.minzheng.blog.dao.ArticleDao;
 import com.minzheng.blog.dao.ArticleTagDao;
 import com.minzheng.blog.dao.CategoryDao;
@@ -31,8 +29,6 @@ import com.minzheng.blog.util.CommonUtils;
 import com.minzheng.blog.util.PageUtils;
 import com.minzheng.blog.util.UserUtils;
 import com.minzheng.blog.vo.*;
-import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
-import com.vladsch.flexmark.util.data.MutableDataSet;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -394,7 +390,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
 
 
     @Override
-    public Result articleSeo(List<Long> ids) {
+    public void articleSeo(List<Integer> ids) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Host", "data.zz.baidu.com");
         headers.add("User-Agent", "curl/7.12.1");
@@ -405,7 +401,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
             HttpEntity<String> entity = new HttpEntity<>(url, headers);
             restTemplate.postForObject(baiduUrl, entity, String.class);
         });
-        return null;
     }
 
     @Override
@@ -418,9 +413,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
             Assert.isTrue(StringUtils.isNotBlank(content.toString()),CRAWLING_ARTICLE_FAILED.getDesc());
             //爬取的是HTML内容，需要转成MD格式的内容
             String newContent = content.get(0).toString().replaceAll("<code>", "<code class=\"lang-java\">");
-            MutableDataSet options = new MutableDataSet();
-            String markdown = FlexmarkHtmlConverter.builder(options).build().convert(newContent)
-                    .replace("lang-java","java");
+//            MutableDataSet options = new MutableDataSet();
+//            String markdown = FlexmarkHtmlConverter.builder(options).build().convert(newContent)
+//                    .replace("lang-java","java");
 
             //文章封面图片 由https://api.btstu.cn/该网站随机获取
             String strResult = restTemplate.getForObject(IMG_URL_API, String.class);
@@ -431,7 +426,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
                     // TODO articleContent MD
 //                    .articleContent(markdown)
                     .articleContent(newContent)
-                    .categoryId(OTHER_CATEGORY_ID).type(YesOrNoEnum.NO.getCode()).originalUrl(url)
+                    .type(2)
+                    .categoryId(OTHER_CATEGORY_ID).type(YesOrNoEnum.NO.getCode())
+                    .originalUrl(url)
                     .articleTitle(title.get(0).text()).articleCover(imgUrl.toString())
                     .build();
             baseMapper.insert(entity);
@@ -440,7 +437,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
             List<Integer> tagsId = new ArrayList<>();
             tags.forEach(item ->{
                 String tag = item.text();
-                Tag result = tagDao.selectOne(new QueryWrapper<Tag>().eq(SqlConf.NAME,tag ));
+                Tag result = tagDao.selectOne(new LambdaQueryWrapper<Tag>().eq(Tag::getTagName, tag ));
                 if (result == null){
                     result = Tag.builder().tagName(tag).build();
                     tagDao.insert(result);
@@ -453,7 +450,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
         } catch (IOException e) {
             log.error(StrUtil.format("堆栈信息:{}", ExceptionUtil.stacktraceToString(e)));
         }
-        return Result.ok();
+        return Result.ok("文章抓取成功");
     }
 
     @Override

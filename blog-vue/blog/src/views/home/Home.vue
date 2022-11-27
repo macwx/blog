@@ -254,6 +254,9 @@
             </div>
             <div class="web-info">
               <div style="padding:4px 0 0">
+                网站作者:<span class="float-right">{{ blogInfo.websiteConfig.websiteAuthor }}</span>
+              </div>
+              <div style="padding:4px 0 0">
                 运行时间:<span class="float-right">{{ time }}</span>
               </div>
               <div style="padding:4px 0 0">

@@ -100,7 +100,7 @@ export default {
   bottom: 0;
   right: 0;
   left: 0;
-  background: url(https://static.talkxj.com/config/0w3pdr.jpg) center center /
+  background: url(https://macwoss.oss-cn-beijing.aliyuncs.com/articles/25ebd8b21e4d4efadf835a5d5289bf2d.jpg) center center /
     cover no-repeat;
 }
 .login-card {

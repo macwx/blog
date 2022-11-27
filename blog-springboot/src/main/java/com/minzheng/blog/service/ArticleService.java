@@ -119,7 +119,7 @@ public interface ArticleService extends IService<Article> {
      * @param ids 文章id集合
      * @return
      */
-    Result articleSeo(List<Long> ids);
+    void articleSeo(List<Integer> ids);
 
     /**
      * 爬取文章

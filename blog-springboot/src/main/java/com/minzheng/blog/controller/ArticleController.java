@@ -233,8 +233,9 @@ public class ArticleController {
 
     @PostMapping(value = "/admin/articles/baiduSeo")
     @ApiOperation(value = "文章SEO", httpMethod = "POST",notes = "文章SEO")
-    public  Result<?>  articleSeo(@RequestBody List<Long> ids) {
-        return articleService.articleSeo(ids);
+    public  Result<?>  articleSeo(@RequestBody List<Integer> ids) {
+        articleService.articleSeo(ids);
+        return Result.ok();
     }
 
     @GetMapping(value = "/admin/articles/reptile")

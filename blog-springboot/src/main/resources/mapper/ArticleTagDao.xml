@@ -5,7 +5,7 @@
     <insert id="saveArticleTags">
         insert ignore into  tb_article_tag(article_id,tag_id) values
         <foreach collection="tags" item="tagsId" index="index" separator=",">
-            ( #{article_id},#{tagsId})
+            ( #{articleId},#{tagsId})
         </foreach>
     </insert>
 </mapper>
