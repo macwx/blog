@@ -147,7 +147,7 @@ blog-springboot
 
 ## 项目截图
 
-![img.png](pic/img.png)
+![img.png](https://macwoss.oss-cn-beijing.aliyuncs.com/photos/20a95856b49fada7fc983e58f07e9d52.png)
 
 ![QQ截图20210320235519 1.jpg](https://static.talkxj.com/articles/1616255938601.jpg)
 

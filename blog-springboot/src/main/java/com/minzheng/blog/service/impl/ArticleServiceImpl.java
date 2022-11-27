@@ -2,10 +2,14 @@ package com.minzheng.blog.service.impl;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.minzheng.blog.common.SqlConf;
 import com.minzheng.blog.dao.ArticleDao;
 import com.minzheng.blog.dao.ArticleTagDao;
 import com.minzheng.blog.dao.CategoryDao;
@@ -17,6 +21,7 @@ import com.minzheng.blog.entity.Category;
 import com.minzheng.blog.entity.Tag;
 import com.minzheng.blog.enums.FileExtEnum;
 import com.minzheng.blog.enums.FilePathEnum;
+import com.minzheng.blog.enums.YesOrNoEnum;
 import com.minzheng.blog.exception.BizException;
 import com.minzheng.blog.service.*;
 import com.minzheng.blog.strategy.context.SearchStrategyContext;
@@ -26,20 +31,32 @@ import com.minzheng.blog.util.CommonUtils;
 import com.minzheng.blog.util.PageUtils;
 import com.minzheng.blog.util.UserUtils;
 import com.minzheng.blog.vo.*;
+import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static com.minzheng.blog.constant.CommonConst.ARTICLE_SET;
-import static com.minzheng.blog.constant.CommonConst.FALSE;
+import static com.minzheng.blog.common.ResultCode.*;
+import static com.minzheng.blog.constant.CommonConst.*;
 import static com.minzheng.blog.constant.RedisPrefixConst.*;
 import static com.minzheng.blog.enums.ArticleStatusEnum.DRAFT;
 import static com.minzheng.blog.enums.ArticleStatusEnum.PUBLIC;
@@ -76,6 +93,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
     private BlogInfoService blogInfoService;
     @Autowired
     private UploadStrategyContext uploadStrategyContext;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${baidu.url}")
+    private String baiduUrl;
 
     @Override
     public PageResult<ArchiveDTO> listArchives() {
@@ -291,6 +314,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
         return urlList;
     }
 
+
+
     @Override
     public List<ArticleSearchDTO> listArticlesBySearch(ConditionVO condition) {
         return searchStrategyContext.executeSearchStrategy(condition.getKeywords());
@@ -366,5 +391,78 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
             articleTagService.saveBatch(articleTagList);
         }
     }
+
+
+    @Override
+    public Result articleSeo(List<Long> ids) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Host", "data.zz.baidu.com");
+        headers.add("User-Agent", "curl/7.12.1");
+        headers.add("Content-Length", "83");
+        headers.add("Content-Type", "text/plain");
+        ids.forEach(item -> {
+            String url = "http://www.shiyit.com/article/" + item;
+            HttpEntity<String> entity = new HttpEntity<>(url, headers);
+            restTemplate.postForObject(baiduUrl, entity, String.class);
+        });
+        return null;
+    }
+
+    @Override
+    public Result reptile(String url) {
+        try {
+            Document document = Jsoup.connect(url).get();
+            Elements title  = document.getElementsByClass("title-article");
+            Elements tags  = document.getElementsByClass("tag-link");
+            Elements content  = document.getElementsByClass("article_content");
+            Assert.isTrue(StringUtils.isNotBlank(content.toString()),CRAWLING_ARTICLE_FAILED.getDesc());
+            //爬取的是HTML内容，需要转成MD格式的内容
+            String newContent = content.get(0).toString().replaceAll("<code>", "<code class=\"lang-java\">");
+            MutableDataSet options = new MutableDataSet();
+            String markdown = FlexmarkHtmlConverter.builder(options).build().convert(newContent)
+                    .replace("lang-java","java");
+
+            //文章封面图片 由https://api.btstu.cn/该网站随机获取
+            String strResult = restTemplate.getForObject(IMG_URL_API, String.class);
+            JSONObject jsonObject = JSON.parseObject(strResult);
+            Object imgUrl = jsonObject.get("imgurl");
+
+            Article entity = Article.builder().userId(1)
+                    // TODO articleContent MD
+//                    .articleContent(markdown)
+                    .articleContent(newContent)
+                    .categoryId(OTHER_CATEGORY_ID).type(YesOrNoEnum.NO.getCode()).originalUrl(url)
+                    .articleTitle(title.get(0).text()).articleCover(imgUrl.toString())
+                    .build();
+            baseMapper.insert(entity);
+
+            //为该文章添加标签
+            List<Integer> tagsId = new ArrayList<>();
+            tags.forEach(item ->{
+                String tag = item.text();
+                Tag result = tagDao.selectOne(new QueryWrapper<Tag>().eq(SqlConf.NAME,tag ));
+                if (result == null){
+                    result = Tag.builder().tagName(tag).build();
+                    tagDao.insert(result);
+                }
+                tagsId.add(result.getId());
+            });
+            articleTagDao.saveArticleTags(entity.getId(),tagsId);
+
+            log.info("文章抓取成功，内容为:{}", JSON.toJSONString(entity));
+        } catch (IOException e) {
+            log.error(StrUtil.format("堆栈信息:{}", ExceptionUtil.stacktraceToString(e)));
+        }
+        return Result.ok();
+    }
+
+    @Override
+    public Result randomImg() {
+        //文章封面图片 由https://api.btstu.cn/该网站随机获取
+        String result = restTemplate.getForObject(IMG_URL_API, String.class);
+        Object imgUrl = JSON.parseObject(result).get("imgurl");
+        return Result.ok(imgUrl);
+    }
+
 
 }

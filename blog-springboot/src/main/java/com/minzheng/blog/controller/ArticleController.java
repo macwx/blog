@@ -230,4 +230,23 @@ public class ArticleController {
         articleImportStrategyContext.importArticles(file, type);
         return Result.ok();
     }
+
+    @PostMapping(value = "/admin/articles/baiduSeo")
+    @ApiOperation(value = "文章SEO", httpMethod = "POST",notes = "文章SEO")
+    public  Result<?>  articleSeo(@RequestBody List<Long> ids) {
+        return articleService.articleSeo(ids);
+    }
+
+    @GetMapping(value = "/admin/articles/reptile")
+    @ApiOperation(value = "文章爬虫", httpMethod = "GET",notes = "文章爬虫")
+    public Result<?>  reptile(String url) {
+        return articleService.reptile(url);
+    }
+
+    @GetMapping(value = "/randomImg")
+    @ApiOperation(value = "随机获取一张图片", httpMethod = "GET", response = Result.class, notes = "随机获取一张图片")
+    public Result<?>  randomImg() {
+        return articleService.randomImg();
+    }
+
 }

@@ -2,7 +2,11 @@ package com.minzheng.blog.dao;
 
 import com.minzheng.blog.entity.ArticleTag;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import io.swagger.models.auth.In;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 
 /**
@@ -13,5 +17,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ArticleTagDao extends BaseMapper<ArticleTag> {
+
+    void saveArticleTags(@Param("articleId") Integer articleId, @Param("tags") List<Integer> tags);
 
 }

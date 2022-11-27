@@ -112,4 +112,26 @@ public interface ArticleService extends IService<Article> {
      * @return {@link List}<{@link String}> 文件地址
      */
     List<String> exportArticles(List<Integer> articleIdList);
+
+
+    /**
+     * 百度seo
+     * @param ids 文章id集合
+     * @return
+     */
+    Result articleSeo(List<Long> ids);
+
+    /**
+     * 爬取文章
+     * @param url 文章地址
+     * @return
+     */
+    Result reptile(String url);
+
+    /**
+     * 随机获取图片
+     * @return
+     */
+    Result randomImg();
+
 }

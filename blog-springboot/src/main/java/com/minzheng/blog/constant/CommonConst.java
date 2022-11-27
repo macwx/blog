@@ -89,4 +89,16 @@ public class CommonConst {
      */
     public static final Integer DEFAULT_CONFIG_ID = 1;
 
+    /**
+     * 默认分类：其他
+     */
+    public static final Integer OTHER_CATEGORY_ID = 1;
+
+    /**
+     * api接口地址
+     */
+    public static final String IMG_URL_API = "https://api.btstu.cn/sjbz/api.php?lx=fengjing&format=json";
+
+
+
 }
