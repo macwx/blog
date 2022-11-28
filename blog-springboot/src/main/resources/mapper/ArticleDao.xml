@@ -37,6 +37,7 @@
         <result column="article_title" property="articleTitle"/>
         <result column="article_content" property="articleContent"/>
         <result column="type" property="type"/>
+        <result column="file_attach" property="fileAttach"/>
         <result column="original_url" property="originalUrl"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -158,6 +159,7 @@
 	 article_content,
 	 a.type,
 	 a.original_url,
+	 a.file_attach,
 	 a.create_time,
 	 a.update_time,
 	 a.category_id,

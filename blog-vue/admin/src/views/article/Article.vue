@@ -43,7 +43,7 @@
         <!-- 文章分类 -->
         <el-form-item label="文章分类">
           <el-tag
-`            type="success"
+            type="success"
             v-show="article.categoryName"
             style="margin:0 1rem 0 0"
             :closable="true"
@@ -195,6 +195,20 @@
             <el-radio :label="2">私密</el-radio>
           </el-radio-group>
         </el-form-item>
+
+
+      <el-form-item label="上传附件">
+          <el-upload
+              class="upload-file-attach"
+              action="/api/admin/articles/attach/"
+              multiple
+              :limit="3"
+            :on-change="handleChange"
+            :file-list="article.fileAttach">
+            <el-button size="small" type="primary">点击上传</el-button>
+<!--            <div slot="tip" class="el-upload__tip">建议文件不要超过200Mb哦！</div>-->
+          </el-upload>
+      </el-form-item>
       </el-form>
       <div slot="footer">
         <el-button @click="addOrEdit = false">取 消</el-button>
@@ -229,7 +243,7 @@ export default {
     //文章自动保存功能
     this.autoSaveArticle();
   },
-  data: function () {
+  data: function() {
     return {
       addOrEdit: false,
       autoSave: true,
@@ -258,6 +272,7 @@ export default {
         articleCover: "",
         categoryName: null,
         tagNameList: [],
+        fileAttach: [],
         originalUrl: "",
         isTop: 0,
         type: 1,
@@ -331,6 +346,11 @@ export default {
             });
       }
     },
+    handleChange(file, fileList) {
+      // console.log(fileList)
+      // console.log(this.article.fileAttach.map(m=>{return m.response.data}))
+      this.article.fileAttach = fileList.slice(-3);
+    },
     saveArticleDraft() {
       if (this.article.articleTitle.trim() == "") {
         this.$message.error("文章标题不能为空");
@@ -381,6 +401,9 @@ export default {
       if (this.article.tagNameList.length == 0) {
         this.$message.error("文章标签不能为空");
         return false;
+      }
+      if ( this.article.fileAttach.length > 0){
+        this.article.fileAttach = this.article.fileAttach.map(m=>{return m.response.data})
       }
       // if (this.article.articleCover.trim() == "") {
       //   this.$message.error("文章封面不能为空");

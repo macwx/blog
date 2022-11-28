@@ -17,7 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.minzheng.blog.constant.OptTypeConst.*;
 
@@ -124,6 +126,16 @@ public class ArticleController {
     @PostMapping("/admin/articles/images")
     public Result<String> saveArticleImages(MultipartFile file) {
         return Result.ok(uploadStrategyContext.executeUploadStrategy(file, FilePathEnum.ARTICLE.getPath()));
+    }
+
+    @ApiOperation(value = "上传附件")
+    @ApiImplicitParam(name = "file", value = "文章附件", required = true, dataType = "MultipartFile")
+    @PostMapping("/admin/articles/attach")
+    public Result<FileVo> saveArticleAttach(MultipartFile file) {
+        FileVo fileVo = new FileVo();
+        fileVo.setName(file.getOriginalFilename());
+        fileVo.setUrl(uploadStrategyContext.executeUploadStrategy(file, FilePathEnum.ARTICLE.getPath()));
+        return Result.ok(fileVo);
     }
 
     /**

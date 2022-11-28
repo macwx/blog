@@ -3,6 +3,8 @@ package com.minzheng.blog.entity;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,6 +55,11 @@ public class Article {
      * 内容
      */
     private String articleContent;
+
+    /**
+     * 文章附件
+     */
+    private String fileAttach;
 
     /**
      * 文章类型

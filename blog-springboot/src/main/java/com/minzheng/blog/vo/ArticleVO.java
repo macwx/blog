@@ -7,6 +7,7 @@ import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -59,6 +60,12 @@ public class ArticleVO {
      */
     @ApiModelProperty(name = "tagNameList", value = "文章标签", dataType = "List<Integer>")
     private List<String> tagNameList;
+
+    /**
+     * 文章标签
+     */
+    @ApiModelProperty(name = "fileAttach", value = "文章标签", dataType = "List<Integer>")
+    private List<FileVo> fileAttach;
 
     /**
      * 文章类型

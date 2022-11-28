@@ -1,5 +1,6 @@
 package com.minzheng.blog.dto;
 
+import com.minzheng.blog.vo.FileVo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,6 +46,16 @@ public class ArticleDTO {
      * 点赞量
      */
     private Integer likeCount;
+
+    /**
+     * 文章附件
+     */
+    private String fileAttach;
+
+    /**
+     *  文章附件
+     */
+    private List<FileVo> fileVoAttachList;
 
     /**
      * 浏览量

@@ -3,6 +3,7 @@ package com.minzheng.blog.service.impl;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -50,6 +51,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.minzheng.blog.common.ResultCode.*;
 import static com.minzheng.blog.constant.CommonConst.*;
@@ -168,6 +170,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
         if (Objects.isNull(article)) {
             throw new BizException("文章不存在");
         }
+        if (Objects.nonNull(article.getFileAttach())) {
+            List<FileVo> fileVoList = JSONArray.parseArray(article.getFileAttach(), FileVo.class);
+            article.setFileVoAttachList(fileVoList);
+        }
         // 更新文章浏览量
         updateArticleViewsCount(articleId);
         // 查询上一篇下一篇文章
@@ -231,6 +237,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
         Article article = BeanCopyUtils.copyObject(articleVO, Article.class);
         if (Objects.nonNull(category)) {
             article.setCategoryId(category.getId());
+        }
+        if (Objects.nonNull(articleVO.getFileAttach())){
+            List<FileVo> fileVoList = articleVO.getFileAttach();
+            article.setFileAttach( JSONArray.toJSONString(fileVoList));
         }
         // 设定默认文章封面
         if (StrUtil.isBlank(article.getArticleCover())){
@@ -331,6 +341,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
         List<String> tagNameList = tagDao.listTagNameByArticleId(articleId);
         // 封装数据
         ArticleVO articleVO = BeanCopyUtils.copyObject(article, ArticleVO.class);
+        if (Objects.nonNull(article.getFileAttach())){
+            articleVO.setFileAttach(JSONArray.parseArray(article.getFileAttach().replace("\n", "").replace("\t", ""),FileVo.class));
+        }
         articleVO.setCategoryName(categoryName);
         articleVO.setTagNameList(tagNameList);
         return articleVO;
