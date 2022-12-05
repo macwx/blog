@@ -402,7 +402,7 @@ export default {
         this.$message.error("文章标签不能为空");
         return false;
       }
-      if ( this.article.fileAttach.length > 0){
+      if (this.article.fileAttach != null && this.article.fileAttach.length > 0){
         this.article.fileAttach = this.article.fileAttach.map(m=>{return m.response.data})
       }
       // if (this.article.articleCover.trim() == "") {

@@ -30,7 +30,7 @@ export default function markdownToHtml(content) {
       }
       linesNum += "</span>";
       if (lang == null) {
-        lang = "java";
+        lang = "html";
       }
       if (lang && hljs.getLanguage(lang)) {
         // highlight.js 高亮代码
