@@ -30,6 +30,8 @@ import com.minzheng.blog.util.CommonUtils;
 import com.minzheng.blog.util.PageUtils;
 import com.minzheng.blog.util.UserUtils;
 import com.minzheng.blog.vo.*;
+import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -426,9 +428,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
             Assert.isTrue(StringUtils.isNotBlank(content.toString()),CRAWLING_ARTICLE_FAILED.getDesc());
             //爬取的是HTML内容，需要转成MD格式的内容
             String newContent = content.get(0).toString().replaceAll("<code>", "<code class=\"lang-java\">");
-//            MutableDataSet options = new MutableDataSet();
-//            String markdown = FlexmarkHtmlConverter.builder(options).build().convert(newContent)
-//                    .replace("lang-java","java");
+            MutableDataSet options = new MutableDataSet();
+            String markdown = FlexmarkHtmlConverter.builder(options).build().convert(newContent)
+                    .replace("lang-java","java");
 
             //文章封面图片 由https://api.btstu.cn/该网站随机获取
             String strResult = restTemplate.getForObject(IMG_URL_API, String.class);
@@ -437,8 +439,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
 
             Article entity = Article.builder().userId(1)
                     // TODO articleContent MD
-//                    .articleContent(markdown)
-                    .articleContent(newContent)
+                    .articleContent(markdown)
+//                    .articleContent(newContent)
                     .type(2)
                     .categoryId(OTHER_CATEGORY_ID).type(YesOrNoEnum.NO.getCode())
                     .originalUrl(url)

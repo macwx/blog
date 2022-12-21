@@ -206,20 +206,16 @@
           <v-card class="blog-card animated zoomIn mt-5 big">
             <div class="web-info-title">
               <v-icon size="18">mdi-account</v-icon>
-              关注我们
+              源码地址
             </div>
             <div class="guanzhu" id="follow-us" ref="follow">
               <ul>
-                <li v-if="isShowSocial('qq')" class="qq">
-                  <a
-                    :href="
-                      'tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=' +
-                        blogInfo.websiteConfig.qq
-                    "
-                    target="_blank"
-                    >{{ blogInfo.websiteConfig.qq }}</a
-                  >
+                <li v-if="isShowSocial('gitee')" class="gitee">
+                  <a :href="blogInfo.websiteConfig.gitee" target="_blank">{{
+                      blogInfo.websiteConfig.gitee
+                    }}</a>
                 </li>
+
                 <li v-if="isShowSocial('email')" class="email">
                   <a href="javascript:void(0);">{{
                     blogInfo.websiteConfig.email
@@ -230,12 +226,17 @@
                     blogInfo.websiteConfig.github
                   }}</a>
                 </li>
-                <li v-if="isShowSocial('gitee')" class="gitee">
-                  <a :href="blogInfo.websiteConfig.gitee" target="_blank">{{
-                    blogInfo.websiteConfig.gitee
-                  }}</a>
+                <li v-if="isShowSocial('qq')" class="qq">
+                  <a
+                      :href="
+                      'tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=' +
+                        blogInfo.websiteConfig.qq
+                    "
+                      target="_blank"
+                  >{{ blogInfo.websiteConfig.qq }}</a
+                  >
                 </li>
-                <!-- <li class="wx"><img src="../../../static/images/wx.jpg"></li> -->
+<!--                 <li class="wx"><img src="../../../static/images/wx.jpg"></li>-->
               </ul>
             </div>
           </v-card>
