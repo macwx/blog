@@ -10,9 +10,9 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://39.105.167.160:3306/blog?serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    url: jdbc:mysql://{你的IP}:3306/blog?serverTimezone=Asia/Shanghai&allowMultiQueries=true
     username: root
-    password: Admin123!
+    password: *********
     hikari:
       minimum-idle: 5
       # 空闲连接存活最大时间，默认600000（10分钟）
@@ -30,12 +30,12 @@ spring:
       connection-test-query: SELECT 1
   # redis配置
   redis:
-    host: 39.103.221.166
+    host: {你的IP}
     port: 8379
-    password: hst123...
+    password: *********
   # mq配置
   rabbitmq:
-    host: 39.103.221.166
+    host: {你的IP}
     port: 5672
     username: guest
     password: guest
@@ -46,9 +46,9 @@ spring:
           max-attempts: 3 #最大重试次数
           initial-interval: 3000 #重试间隔时间（单位毫秒）
   # es配置 若搜索模式为mysql可删除
-#  elasticsearch:
-#    rest:
-#      uris: 你的IP:9200
+  #  elasticsearch:
+  #    rest:
+  #      uris: 你的IP:9200
   # 邮箱配置
   mail:
     host: smtp.qq.com
@@ -85,15 +85,15 @@ upload:
   mode: oss
   local:
     # nginx映射本地文件路径，无域名则为 ip:83
-    url: http://file.henaumcw.top/
+    url: {改为你的URL}
     # 本地文件存储路径
     path: /usr/local/upload/
   oss:
-    url: http://file.henaumcw.top/
+    url: {改为你的URL}
     endpoint: oss-cn-beijing.aliyuncs.com
-    accessKeyId: LTAI4Fkr7MrNxGnGwTCRSN5S
-    accessKeySecret: NbiJg6RA9xx8bqyh4d14VP8loUj2VE
-    bucketName: macwoss
+    accessKeyId: {改为你的AK}
+    accessKeySecret: {改为你的SK}
+    bucketName: {Bucket域名}
   cos:
     url: http://Bucket域名/
     secretId: cos的secretId
@@ -103,7 +103,7 @@ upload:
 
 # 网站前台域名（邮件通知用）
 website:
-  url: http://www.macw.cc
+  url: http://www.macw.cc{改为你的}
 
 #第三方配置信息
 qq:
@@ -119,6 +119,6 @@ weibo:
   access-token-url: https://api.weibo.com/oauth2/access_token
   user-info-url: https://api.weibo.com/2/users/show.json?uid={uid}&access_token={access_token}
 
-
+# 百度统计
 baidu:
   url: http://data.zz.baidu.com/urls?site=www.macw.cc&token=5pvB23OAysf43KNH
