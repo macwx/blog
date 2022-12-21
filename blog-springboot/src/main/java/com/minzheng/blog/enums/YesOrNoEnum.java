@@ -6,7 +6,7 @@ package com.minzheng.blog.enums;
  * @apiNote
  */
 public enum YesOrNoEnum {
-    NO (0, "否"),
+    NO (2, "否"),
 
     YES (1, "是");
 

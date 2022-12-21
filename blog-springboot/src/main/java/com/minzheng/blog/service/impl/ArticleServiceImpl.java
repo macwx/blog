@@ -441,8 +441,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
                     // TODO articleContent MD
                     .articleContent(markdown)
 //                    .articleContent(newContent)
-                    .type(2)
-                    .categoryId(OTHER_CATEGORY_ID).type(YesOrNoEnum.NO.getCode())
+                    .categoryId(OTHER_CATEGORY_ID)
+                    .type(YesOrNoEnum.NO.getCode())
                     .originalUrl(url)
                     .articleTitle(title.get(0).text()).articleCover(imgUrl.toString())
                     .build();
