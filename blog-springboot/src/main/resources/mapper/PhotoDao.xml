@@ -5,4 +5,7 @@
 <mapper namespace="com.minzheng.blog.dao.PhotoDao">
 
 
+    <select id="randomPhoto" resultType="java.lang.String">
+        SELECT photo_src FROM tb_photo WHERE album_id = #{albumId} ORDER BY RAND() LIMIT 1;
+    </select>
 </mapper>

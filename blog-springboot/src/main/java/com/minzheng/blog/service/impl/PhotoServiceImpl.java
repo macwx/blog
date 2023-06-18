@@ -2,6 +2,7 @@ package com.minzheng.blog.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -141,6 +142,16 @@ public class PhotoServiceImpl extends ServiceImpl<PhotoDao, Photo> implements Ph
                 .photoAlbumName(photoAlbum.getAlbumName())
                 .photoList(photoList)
                 .build();
+    }
+
+    @Override
+    public String randomPhoto(Integer albumId,String type) {
+        String photoUrl = photoDao.randomPhoto(albumId);
+        if ("json".equals(type)){
+            return Result.ok(photoUrl).toString();
+        }else {
+            return photoUrl;
+        }
     }
 
 }

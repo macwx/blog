@@ -475,6 +475,4 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
         Object imgUrl = JSON.parseObject(result).get("imgurl");
         return Result.ok(imgUrl);
     }
-
-
 }

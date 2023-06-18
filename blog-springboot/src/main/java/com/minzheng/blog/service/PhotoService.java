@@ -67,4 +67,10 @@ public interface PhotoService extends IService<Photo> {
      */
     PhotoDTO listPhotosByAlbumId(Integer albumId);
 
+    /**
+     * 从相册随机获取一张图片
+     * @return
+     */
+    String randomPhoto(Integer albumId,String type);
+
 }

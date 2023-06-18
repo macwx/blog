@@ -419,10 +419,10 @@ export default {
     }]
   },
   mounted: function() {
-    setInterval(() => {
-      this.rotateX(this.speedX);
-      this.rotateY(this.speedY);
-    }, 17);
+    // setInterval(() => {
+    //   this.rotateX(this.speedX);
+    //   this.rotateY(this.speedY);
+    // }, 17);
     window.WIDGET = {
       CONFIG: {
         layout: "2",

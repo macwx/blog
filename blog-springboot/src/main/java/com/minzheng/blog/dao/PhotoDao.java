@@ -14,6 +14,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PhotoDao extends BaseMapper<Photo> {
 
+    /**
+     * 随机获取相册中一条数据
+     * @param albumId
+     * @return
+     */
+    String randomPhoto(Integer albumId);
+
 
 
 }

@@ -121,4 +121,13 @@ public class PhotoController {
         return Result.ok(photoService.listPhotosByAlbumId(albumId));
     }
 
+
+    @GetMapping(value = "/randomPhoto")
+    @ApiOperation(value = "从相册随机获取一张图片", httpMethod = "GET", response = Result.class, notes = "从相册随机获取一张图片")
+    public String  randomPhoto(Integer albumId,String type) {
+        return photoService.randomPhoto(albumId,type);
+    }
+
+
+
 }
