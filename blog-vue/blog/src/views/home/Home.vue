@@ -361,8 +361,8 @@ export default {
       str += day.getSeconds() + "秒";
       this.time = str;
     },
-    initMoyuPic() {
-      this.axios
+    async initMoyuPic() {
+      await this.axios
         .get("https://api.vvhan.com/api/moyu", {
           params: {
             type: "json"
@@ -418,11 +418,7 @@ export default {
       content: "一个专注于技术分享的博客平台,大家以共同学习,乐于分享,拥抱开源的价值观进行学习交流"
     }]
   },
-  mounted: function() {
-    setInterval(() => {
-      this.rotateX(this.speedX);
-      this.rotateY(this.speedY);
-    }, 17);
+  mounted:async  function() {
     window.WIDGET = {
       CONFIG: {
         layout: "2",

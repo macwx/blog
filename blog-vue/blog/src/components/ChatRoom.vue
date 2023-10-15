@@ -12,7 +12,7 @@
         <img
           width="32"
           height="32"
-          src="https://static.talkxj.com/config/logo.png"
+          src="https://macwoss.oss-cn-beijing.aliyuncs.com/articles/13d397a33d8cacee06ee644e6d540c2d.png"
         />
         <div style="margin-left:12px">
           <div>聊天室</div>
@@ -146,7 +146,7 @@
       <img
         width="100%"
         height="100%"
-        src="https://static.talkxj.com/config/logo.png"
+        src="https://macwoss.oss-cn-beijing.aliyuncs.com/articles/13d397a33d8cacee06ee644e6d540c2d.png"
       />
     </div>
   </div>
