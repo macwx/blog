@@ -12,11 +12,22 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -260,6 +271,25 @@ public class ArticleController {
     @ApiOperation(value = "随机获取一张图片", httpMethod = "GET", response = Result.class, notes = "随机获取一张图片")
     public Result<?>  randomImg() {
         return articleService.randomImg();
+    }
+
+    @GetMapping(value = "/randomPhoto")
+    @ApiOperation(value = "随机获取一张内部图片", httpMethod = "GET", response = Result.class, notes = "随机获取一张内部图片")
+    public ResponseEntity<Resource> randomPhoto(Integer albumId) throws IOException {
+        String url = articleService.randomPhoto(albumId);
+        try {
+            Resource resource = new UrlResource(new URL(url));
+            if (!resource.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+            // 这里需要设置Content-Type为image/jpeg或image/png等，以确保客户端正确显示图片
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }

@@ -134,4 +134,11 @@ public interface ArticleService extends IService<Article> {
      */
     Result randomImg();
 
+    /**
+     * 随机获取一张系统图片
+     * @param albumId
+     * @return
+     */
+    String randomPhoto(Integer albumId);
+
 }

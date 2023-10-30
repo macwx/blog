@@ -6,18 +6,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.minzheng.blog.dao.ArticleDao;
-import com.minzheng.blog.dao.ArticleTagDao;
-import com.minzheng.blog.dao.CategoryDao;
-import com.minzheng.blog.dao.TagDao;
+import com.minzheng.blog.dao.*;
 import com.minzheng.blog.dto.*;
-import com.minzheng.blog.entity.Article;
-import com.minzheng.blog.entity.ArticleTag;
-import com.minzheng.blog.entity.Category;
-import com.minzheng.blog.entity.Tag;
+import com.minzheng.blog.entity.*;
 import com.minzheng.blog.enums.FileExtEnum;
 import com.minzheng.blog.enums.FilePathEnum;
 import com.minzheng.blog.enums.YesOrNoEnum;
@@ -96,6 +91,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private PhotoDao photoDao;
 
     @Value("${baidu.url}")
     private String baiduUrl;
@@ -474,6 +472,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, Article> impleme
         String result = restTemplate.getForObject(IMG_URL_API, String.class);
         Object imgUrl = JSON.parseObject(result).get("imgurl");
         return Result.ok(imgUrl);
+    }
+
+    @Override
+    public String randomPhoto(Integer albumId) {
+        Photo photo = photoDao.selectOne(new LambdaQueryWrapper<Photo>().eq(Objects.nonNull(albumId), Photo::getAlbumId, albumId)
+                .last("ORDER BY RAND() LIMIT 1"));
+        return photo==null?"https://macwoss.oss-cn-beijing.aliyuncs.com/photos/65e4a5fdbdb02a22a3262b06cef336f9.jpg":photo.getPhotoSrc();
     }
 
 
