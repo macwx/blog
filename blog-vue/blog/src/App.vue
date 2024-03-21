@@ -73,9 +73,9 @@ export default {
         model: { jsonPath: '../live2dw/live2d-widget-model-haru_1/assets/haru01.model.json' },
         display: { position: 'left', width: 300, height: 600 },  //调整大小,和位置
         mobile: { show: true },   //要不要盯着你的鼠标看
-        log: false,
-      })
-    }, 1000)
+        log: false
+      });
+    });
 
   // 获取博客信息
     this.getBlogInfo();
