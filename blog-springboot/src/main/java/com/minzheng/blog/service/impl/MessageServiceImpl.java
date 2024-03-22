@@ -53,7 +53,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageDao, Message> impleme
         String ipSource = IpUtils.getIpSource(ipAddress);
         Message message = BeanCopyUtils.copyObject(messageVO, Message.class);
         message.setMessageContent(HTMLUtils.filter(message.getMessageContent()));
-        message.setAvatar(message.getAvatar()+"&t="+CommonUtils.getRandomCode());
+        message.setAvatar(message.getAvatar());
         message.setIpAddress(ipAddress);
         message.setIsReview(isReview == TRUE ? FALSE : TRUE);
         message.setIpSource(ipSource);
