@@ -2,18 +2,18 @@ package com.minzheng.blog.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.minzheng.blog.dao.*;
 import com.minzheng.blog.dto.*;
+import com.minzheng.blog.entity.About;
 import com.minzheng.blog.entity.Article;
 import com.minzheng.blog.entity.WebsiteConfig;
-import com.minzheng.blog.service.BlogInfoService;
-import com.minzheng.blog.service.PageService;
-import com.minzheng.blog.service.RedisService;
-import com.minzheng.blog.service.UniqueViewService;
+import com.minzheng.blog.service.*;
 import com.minzheng.blog.util.BeanCopyUtils;
 import com.minzheng.blog.util.IpUtils;
+import com.minzheng.blog.util.UserUtils;
 import com.minzheng.blog.vo.BlogInfoVO;
 import com.minzheng.blog.vo.PageVO;
 import com.minzheng.blog.vo.WebsiteConfigVO;
@@ -26,6 +26,7 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,9 @@ public class BlogInfoServiceImpl implements BlogInfoService {
     private HttpServletRequest request;
     @Autowired
     private PageService pageService;
+
+    @Autowired
+    private AboutService aboutService;
 
     @Override
     public BlogHomeInfoDTO getBlogHomeInfo() {
@@ -162,11 +166,26 @@ public class BlogInfoServiceImpl implements BlogInfoService {
     @Override
     public String getAbout() {
         Object value = redisService.get(ABOUT);
-        return Objects.nonNull(value) ? value.toString() : "";
+        if (Objects.isNull(value)) {
+            String about = aboutService.getOne(new QueryWrapper<About>().lambda()
+                    .eq(About::getUserId, UserUtils.getLoginUser().getUserInfoId())
+                    .select(About::getAboutContent)
+                            .orderByDesc(About::getCreateTime)
+                            .last("limit 1"))
+                    .getAboutContent();
+            redisService.set(ABOUT, about);
+            return about;
+        }
+        return value.toString();
     }
 
     @Override
     public void updateAbout(BlogInfoVO blogInfoVO) {
+        About about = About.builder()
+                .userId(UserUtils.getLoginUser().getUserInfoId())
+                .aboutContent(blogInfoVO.getAboutContent())
+                .build();
+        aboutService.saveOrUpdate(about);
         redisService.set(ABOUT, blogInfoVO.getAboutContent());
     }
 
