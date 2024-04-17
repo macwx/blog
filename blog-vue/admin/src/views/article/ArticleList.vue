@@ -566,7 +566,6 @@ export default {
       } else {
         param = [id];
       }
-      console.log(param);
       this.axios.post("/api/admin/articles/export", param).then(({data}) => {
         if (data.flag) {
           this.$notify.success({
@@ -593,7 +592,6 @@ export default {
       } else {
         param = [id];
       }
-      console.log(param);
       this.axios.post("/api/admin/articles/baiduSeo", param).then(({data}) => {
         if (data.flag) {
           this.$notify.success({
@@ -621,7 +619,6 @@ export default {
         }
       }).then(({data}) => {
         if (data.flag) {
-          console.log(data.data)
           this.$message.success("OK")
           this.dialogTableVisible = false
           this.loadingReptile = false

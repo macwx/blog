@@ -8,7 +8,7 @@ import com.minzheng.blog.dto.UserInfoDTO;
  * @author yezhiqiu
  * @date 2021/07/28
  */
-public interface SocialLoginStrategy {
+public interface SocialLoginStrategy  {
 
     /**
      * 登录

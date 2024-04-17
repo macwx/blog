@@ -62,10 +62,7 @@ export default {
     //初始化标签位置
     let tags = [];
     this.axios.get("/api/tags").then(res => {
-      console.log(res.data);
-      console.log(res.data.data);
       for (let i = 0; i < res.data.data.recordList.length; i++) {
-        console.log(res.data.data.recordList[i]);
         let tag = {};
         let k = -1 + (2 * (i + 1) - 1) / res.data.data.recordList.length;
         let a = Math.acos(k);
@@ -77,7 +74,6 @@ export default {
         tags.push(tag);
       }
     });
-    console.log(tags);
     this.tags = tags;
   },
   data: function() {

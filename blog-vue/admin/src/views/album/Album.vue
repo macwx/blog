@@ -170,7 +170,6 @@ export default {
   methods: {
     openModel(item) {
       if (item) {
-        console.log(item);
         this.albumForum = JSON.parse(item);
         this.$refs.albumTitle.innerHTML = "修改相册";
       } else {
@@ -260,7 +259,6 @@ export default {
         this.albumForum.id = data;
         this.isdelete = true;
       } else {
-        console.log(data);
         this.openModel(data);
       }
     },
