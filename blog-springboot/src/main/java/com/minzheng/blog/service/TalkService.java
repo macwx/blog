@@ -26,6 +26,12 @@ public interface TalkService extends IService<Talk> {
     List<String> listHomeTalks();
 
     /**
+     * 随机查询talk一条记录的第一句
+     * @return
+     */
+    String talks();
+
+    /**
      * 获取说说列表
      *
      * @return {@link PageResult<TalkDTO>} 说说列表

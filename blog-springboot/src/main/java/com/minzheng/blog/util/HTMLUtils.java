@@ -52,6 +52,7 @@ public class HTMLUtils {
         source = source.replaceAll("<[\\s]*?script[^>]*?>[\\s\\S]*?<[\\s]*?\\/[\\s]*?script[\\s]*?>", "");
         // 删除style标签
         source = source.replaceAll("<[\\s]*?style[^>]*?>[\\s\\S]*?<[\\s]*?\\/[\\s]*?style[\\s]*?>", "");
+        source = source.replaceAll("<p>", "");
         return source;
     }
 

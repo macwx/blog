@@ -45,6 +45,15 @@ public class TalkController {
     }
 
     /**
+     * 随机查询talk一条记录的第一句
+     */
+    @ApiOperation(value = "随机查询talk一条记录的第一句")
+    @GetMapping("/talks/first")
+    public Result<String> talks(){
+        return Result.ok(talkService.talks());
+    }
+
+    /**
      * 查看说说列表
      *
      * @return {@link Result<TalkDTO>}

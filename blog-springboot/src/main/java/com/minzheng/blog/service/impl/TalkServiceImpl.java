@@ -66,6 +66,24 @@ public class TalkServiceImpl extends ServiceImpl<TalkDao, Talk> implements TalkS
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public String talks() {
+        Talk talk = talkDao.selectOne(new LambdaQueryWrapper<Talk>()
+                .eq(Talk::getStatus, PUBLIC.getStatus())
+                .last("ORDER BY RAND() LIMIT 1"));
+        String content = talk.getContent();
+        if (content.length()>45){
+            content = HTMLUtils.deleteHMTLTag(content.substring(0, 45)+"...");
+        }else {
+            content = HTMLUtils.deleteHMTLTag(content);
+        }
+        if (content.contains("\n")){
+            content = content.split("\\n")[0];
+        }
+        return content;
+    }
+
     @Override
     public PageResult<TalkDTO> listTalks() {
         // 查询说说总量

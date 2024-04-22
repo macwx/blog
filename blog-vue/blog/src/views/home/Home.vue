@@ -325,17 +325,9 @@ export default {
         document.title = this.blogInfo.websiteConfig.websiteName;
       }
       // 使用async/await进行异步请求
-      try {
-        const response = await fetch("/api/hitokoto");
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        this.initTyped(data.hitokoto);
-      } catch (error) {
-        // 可以在这里处理请求错误，例如打印错误或展示给用户
-        console.error("Error fetching hitokoto:", error);
-      }
+      this.axios.get("/api/talks/first").then(({data}) => {
+        this.initTyped(data.data);
+      });
 
       // // 一言Api进行打字机循环输出效果
       // fetch("https://v1.hitokoto.cn?c=i")
