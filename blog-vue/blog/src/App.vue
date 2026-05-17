@@ -1,5 +1,6 @@
 <template>
   <v-app id="app">
+    <FloatingImage />
     <!-- 导航栏 -->
     <TopNavBar></TopNavBar>
     <!-- 侧边导航栏 -->
@@ -23,9 +24,9 @@
     <!-- 绑定邮箱模态框 -->
     <EmailModel></EmailModel>
     <!-- 音乐播放器 -->
-    <Player v-if="blogInfo.websiteConfig.isMusicPlayer === 1" />
+    <Player v-if="blogInfo.websiteConfig && blogInfo.websiteConfig.isMusicPlayer === 1" />
     <!-- 聊天室 -->
-    <ChatRoom v-if="blogInfo.websiteConfig.isChatRoom === 1"></ChatRoom>
+    <ChatRoom v-if="blogInfo.websiteConfig && blogInfo.websiteConfig.isChatRoom === 1"></ChatRoom>
   </v-app>
 </template>
 
@@ -34,13 +35,15 @@ import TopNavBar from "./components/layout/TopNavBar";
 import SideNavBar from "./components/layout/SideNavBar";
 import Footer from "./components/layout/Footer";
 import BackTop from "./components/BackTop";
-import searchModel from "./components/model/SearchModel";
-import LoginModel from "./components/model/LoginModel";
-import RegisterModel from "./components/model/RegisterModel";
-import ForgetModel from "./components/model/ForgetModel";
-import EmailModel from "./components/model/EmailModel";
-import Player from "./components/zw-player/player.vue";
-import ChatRoom from "./components/ChatRoom";
+
+const searchModel = () => import(/* webpackChunkName: "searchModel" */ "./components/model/SearchModel");
+const LoginModel = () => import(/* webpackChunkName: "loginModel" */ "./components/model/LoginModel");
+const RegisterModel = () => import(/* webpackChunkName: "registerModel" */ "./components/model/RegisterModel");
+const ForgetModel = () => import(/* webpackChunkName: "forgetModel" */ "./components/model/ForgetModel");
+const EmailModel = () => import(/* webpackChunkName: "emailModel" */ "./components/model/EmailModel");
+const Player = () => import(/* webpackChunkName: "player" */ "./components/zw-player/player.vue");
+const ChatRoom = () => import(/* webpackChunkName: "chatRoom" */ "./components/ChatRoom");
+const FloatingImage = () => import(/* webpackChunkName: "floatingImage" */ "./components/FloatingImage.vue");
 export default {
   name: 'App',
   /*看板娘初始化
@@ -63,19 +66,20 @@ export default {
        opacityOnHover 鼠标悬浮透明度
   */
   created() {
-    setTimeout(() => {
-      window.L2Dwidget.init({
-        pluginRootPath: '../live2dw/',
-        pluginJsPath: 'lib/',
-        pluginModelPath: 'live2d-widget-model-haru_1/assets/', //中间这个haru_2就是你的老婆,想换个老婆,换这个就可以了
-        tagMode: false,
-        debug: false,
-        model: { jsonPath: '../live2dw/live2d-widget-model-haru_1/assets/haru01.model.json' },
-        display: { position: 'left', width: 300, height: 600 },  //调整大小,和位置
-        mobile: { show: true },   //要不要盯着你的鼠标看
-        log: false
-      });
-    });
+    // 看板娘
+    // setTimeout(() => {
+    //   window.L2Dwidget.init({
+    //     pluginRootPath: '../live2dw/',
+    //     pluginJsPath: 'lib/',
+    //     pluginModelPath: 'live2d-widget-model-haru_1/assets/', //中间这个haru_2就是你的老婆,想换个老婆,换这个就可以了
+    //     tagMode: false,
+    //     debug: false,
+    //     model: { jsonPath: '../live2dw/live2d-widget-model-haru_1/assets/haru01.model.json' },
+    //     display: { position: 'left', width: 300, height: 600 },  //调整大小,和位置
+    //     mobile: { show: true },   //要不要盯着你的鼠标看
+    //     log: false
+    //   });
+    // });
 
   // 获取博客信息
     this.getBlogInfo();
@@ -93,6 +97,7 @@ export default {
     RegisterModel,
     ForgetModel,
     EmailModel,
+    FloatingImage,
     ChatRoom
   },
   methods: {

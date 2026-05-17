@@ -204,7 +204,13 @@ export default {
     },
     connect() {
       var that = this;
-      this.websocket = new WebSocket(this.blogInfo.websiteConfig.websocketUrl);
+      // 生成或获取客户端唯一标识
+      var clientId = localStorage.getItem("chat_client_id");
+      if (!clientId) {
+        clientId = "cid_" + Math.random().toString(36).substr(2, 16) + "_" + Date.now();
+        localStorage.setItem("chat_client_id", clientId);
+      }
+      this.websocket = new WebSocket(this.blogInfo.websiteConfig.websocketUrl + "?clientId=" + clientId);
       // 连接发生错误的回调方法
       this.websocket.onerror = function(event) {
         console.log(event);

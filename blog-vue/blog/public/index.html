@@ -1,28 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<!--   SSL设置，没有SSL注释掉下面这一行   -->
-<!--     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">-->
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- SSL设置，没有SSL注释掉下面这一行 -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> -->
+
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title>超伟博客,开源博客,macw.cc</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/github-markdown-css/2.2.1/github-markdown.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.css" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-    <link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" >
-    <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.js"></script>
-    <script src="http://tjs.sjs.sinajs.cn/open/api/js/wb.js?appkey=4039197195" type="text/javascript"
-            charset="utf-8"></script>
-    <script type="text/javascript" src="http://connect.qq.com/qc_jssdk.js" data-appid="102025913"
-            data-redirecturi="https://www.macw.cc/oauth/login/qq" charset="utf-8"></script>
-    <!-- 看板娘 -->
-    <script type="text/javascript" src="./live2dw/lib/L2Dwidget.min.js"></script>
+    <meta name="description" content="超伟博客是一个开源博客平台，分享技术、生活和思考。欢迎访问macw.cc，体验轻量级博客系统。">
+    <meta name="keywords" content="博客, 开源, macw.cc, 技术, 生活, 编程, 学习">
 
+    <!-- 百度SEO优化 Meta 标签 -->
+    <meta name="robots" content="index,follow"> <!-- 告诉百度抓取页面并跟踪链接 -->
+    <meta name="baidu-site-verification" content="5pvB23OAysf43KNH"> <!-- 可选：百度站点验证 -->
 
-        <!-- 百度统计 -->
+    <!-- Open Graph 标记（社交媒体优化）-->
+    <meta property="og:title" content="超伟博客，开源博客平台，macw.cc">
+    <meta property="og:description" content="超伟博客分享技术、编程、生活，轻松记录点滴，欢迎访问macw.cc。">
+    <meta property="og:image" content="http://macwoss.oss-cn-beijing.aliyuncs.com/avatar/30000eb316b3f2979a6d3aa2cbb44fbd.jpg"> <!-- 替换为你的网站图片 -->
+    <meta property="og:url" content="https://www.macw.cc">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter 卡片标记 -->
+    <meta name="twitter:title" content="超伟博客，开源博客平台，macw.cc">
+    <meta name="twitter:description" content="超伟博客分享技术、编程、生活，轻松记录点滴，欢迎访问macw.cc。">
+    <meta name="twitter:image" content="http://macwoss.oss-cn-beijing.aliyuncs.com/avatar/30000eb316b3f2979a6d3aa2cbb44fbd.jpg"> <!-- 替换为你的网站图片 -->
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- 使用CDN加速加载GitHub Markdown CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/github-markdown-css/2.2.1/github-markdown.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/github-markdown-css/2.2.1/github-markdown.css" /></noscript>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet"></noscript>
+    <link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css"></noscript>
+
+    <!-- 页面结构化数据：使用Schema.org标记 -->
+    <script type="application/ld+json">
+        {
+            "@context": "http://schema.org",
+            "@type": "WebSite",
+            "name": "超伟博客",
+            "url": "https://www.macw.cc",
+            "description": "超伟博客是一个开源博客平台，分享技术、生活和思考。",
+            "publisher": {
+                "@type": "Organization",
+                "name": "超伟博客"
+            },
+            "mainEntityOfPage": "https://www.macw.cc"
+        }
+    </script>
+
+    <!-- 将所有脚本移至底部，避免阻塞渲染 -->
+    <!-- 使用defer避免阻塞页面加载 -->
+    <script src="https://ssl.captcha.qq.com/TCaptcha.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.8.3/katex.min.js" defer></script>
+    <script src="http://tjs.sjs.sinajs.cn/open/api/js/wb.js?appkey=4039197195" type="text/javascript" charset="utf-8" defer></script>
+    <script type="text/javascript" src="http://connect.qq.com/qc_jssdk.js" data-appid="102025913" data-redirecturi="https://www.macw.cc/oauth/login/qq" charset="utf-8" defer></script>
+
+    <!-- 百度统计 -->
     <script>
         var _hmt = _hmt || [];
         (function () {
@@ -32,26 +71,25 @@
             s.parentNode.insertBefore(hm, s);
         })();
     </script>
-    <!--        &lt;!&ndash; 谷歌广告&ndash;&gt;-->
-    <!--      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2472556124204051"-->
-    <!--              crossorigin="anonymous"></script>-->
+
     <style>
         /* 全局变灰*/
-        /*html {*/
-        /*    -webkit-filter: grayscale(100%);*/
-        /*    -moz-filter: grayscale(100%);*/
-        /*    -ms-filter: grayscale(100%);*/
-        /*    -o-filter: grayscale(100%);*/
-        /*    filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);*/
-        /*    _filter:none;*/
-        /*}*/
+        /*html {
+            -webkit-filter: grayscale(100%);
+            -moz-filter: grayscale(100%);
+            -ms-filter: grayscale(100%);
+            -o-filter: grayscale(100%);
+            filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
+            _filter:none;
+        }*/
     </style>
 </head>
+
 <body>
-
 <div id="app"></div>
-<!--     <script type="text/javascript" src="https://static.talkxj.com/js/ribbon.js"></script>-->
+
+<!-- 将脚本移至底部 -->
+<!-- <script type="text/javascript" src="https://static.talkxj.com/js/ribbon.js"></script> -->
 </body>
+
 </html>
-
-

@@ -167,14 +167,19 @@ public class BlogInfoServiceImpl implements BlogInfoService {
     public String getAbout() {
         Object value = redisService.get(ABOUT);
         if (Objects.isNull(value)) {
-            String about = aboutService.getOne(new QueryWrapper<About>().lambda()
-                    .eq(About::getUserId, UserUtils.getLoginUser().getUserInfoId())
+            LambdaQueryWrapper<About> wrapper = new QueryWrapper<About>().lambda()
                     .select(About::getAboutContent)
-                            .orderByDesc(About::getCreateTime)
-                            .last("limit 1"))
-                    .getAboutContent();
-            redisService.set(ABOUT, about);
-            return about;
+                    .orderByDesc(About::getCreateTime)
+                    .last("limit 1");
+            try {
+                wrapper.eq(About::getUserId, UserUtils.getLoginUser().getUserInfoId());
+            } catch (Exception ignored) {
+                // 未登录用户，不按用户过滤
+            }
+            About about = aboutService.getOne(wrapper);
+            String content = about != null ? about.getAboutContent() : "";
+            redisService.set(ABOUT, content);
+            return content;
         }
         return value.toString();
     }

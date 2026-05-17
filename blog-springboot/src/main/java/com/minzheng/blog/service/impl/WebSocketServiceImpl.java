@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.minzheng.blog.enums.ChatTypeEnum.*;
@@ -73,11 +74,23 @@ public class WebSocketServiceImpl {
 
         @Override
         public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
+            // 优先从query参数获取客户端传来的唯一标识
+            String query = request.getRequestURI().getQuery();
+            if (query != null) {
+                for (String param : query.split("&")) {
+                    String[] kv = param.split("=", 2);
+                    if (kv.length == 2 && "clientId".equals(kv[0])) {
+                        sec.getUserProperties().put(HEADER_NAME, kv[1]);
+                        return;
+                    }
+                }
+            }
+            // 其次尝试从Nginx的X-Real-IP头获取
             try {
                 String firstFoundHeader = request.getHeaders().get(HEADER_NAME.toLowerCase()).get(0);
                 sec.getUserProperties().put(HEADER_NAME, firstFoundHeader);
             } catch (Exception e) {
-                sec.getUserProperties().put(HEADER_NAME, "未知ip");
+                sec.getUserProperties().put(HEADER_NAME, UUID.randomUUID().toString());
             }
         }
     }
@@ -116,6 +129,8 @@ public class WebSocketServiceImpl {
             case SEND_MESSAGE:
                 // 发送消息
                 ChatRecord chatRecord = JSON.parseObject(JSON.toJSONString(messageDTO.getData()), ChatRecord.class);
+                // 用服务端记录的ip覆盖客户端传入的值，确保身份一致
+                chatRecord.setIpAddress((String) session.getUserProperties().get(ChatConfigurator.HEADER_NAME));
                 // 过滤html标签
                 chatRecord.setContent(HTMLUtils.filter(chatRecord.getContent()));
                 chatRecordDao.insert(chatRecord);

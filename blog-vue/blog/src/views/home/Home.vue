@@ -236,15 +236,14 @@
                   >{{ blogInfo.websiteConfig.qq }}</a
                   >
                 </li>
-                <!--                 <li class="wx"><img src="../../../static/images/wx.jpg"></li>-->
               </ul>
             </div>
           </v-card>
 
           <!--天气-->
-          <v-card class="blog-card animated zoomIn mt-5">
-            <div id="he-plugin-standard"></div>
-          </v-card>
+<!--          <v-card class="blog-card animated zoomIn mt-5">-->
+<!--            <div id="he-plugin-standard"></div>-->
+<!--          </v-card>-->
           <!--标签云已移植到标签页-->
 
           <!-- 网站信息 -->
@@ -269,9 +268,9 @@
           </v-card>
 
           <!-- 摸鱼日历 -->
-          <!--          <v-card class="mt-5" v-click-outside>-->
-          <!--            <v-img :src="moyuPic" @click="preview()"/>-->
-          <!--          </v-card>-->
+<!--          <v-card class="mt-5" v-click-outside>-->
+<!--            <v-img src="https://macwoss.oss-cn-beijing.aliyuncs.com/config/83c25cbf0399ab91f569d6fa13af6662.png" width="300px" @click="preview()"/>-->
+<!--          </v-card>-->
         </div>
       </v-col>
     </v-row>
@@ -285,6 +284,9 @@
 <script>
 import Swiper from "../../components/Swiper.vue";
 import EasyTyper from "easy-typer-js";
+import MarkdownIt from "markdown-it";
+
+const md = new MarkdownIt();
 
 export default {
   components: {
@@ -311,7 +313,7 @@ export default {
         sentencePause: true
       },
       articleList: [],
-      moyuPic: "",
+      moyuPic: "../../../public/img/wanma.png",
       talkList: [],
       current: 1
     };
@@ -379,17 +381,16 @@ export default {
     //         this.moyuPic = data.url;
     //       });
     // },
-    // preview() {
-    //   let pic_images = [this.moyuPic];
-    //   this.$imagePreview({
-    //     showIndex: true,
-    //     loop: false,
-    //     images: pic_images,
-    //     index: 0
-    //   });
-    // },
+    preview() {
+      let pic_images = [this.moyuPic];
+      this.$imagePreview({
+        showIndex: true,
+        loop: false,
+        images: pic_images,
+        index: 0
+      });
+    },
     infiniteHandler($state) {
-      let md = require("markdown-it")();
       this.axios
           .get("/api/articles", {
             params: {

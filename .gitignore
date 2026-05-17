@@ -4,6 +4,10 @@ node_modules
 
 blog-vue/blog/dist
 
+# Spring Boot 配置文件（含数据库密码等敏感信息）
+blog-springboot/src/main/resources/application-prod.yml
+blog-springboot/src/main/resources/application-test.yml
+
 # local env files
 .env.local
 .env.*.local

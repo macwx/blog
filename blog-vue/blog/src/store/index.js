@@ -23,7 +23,14 @@ export default new Vuex.Store({
     articleLikeSet: [],
     commentLikeSet: [],
     talkLikeSet: [],
-    blogInfo: {}
+    blogInfo: {
+      websiteConfig: {},
+      pageList: [],
+      articleCount: 0,
+      categoryCount: 0,
+      tagCount: 0,
+      viewsCount: 0
+    }
   },
   mutations: {
     login(state, user) {
