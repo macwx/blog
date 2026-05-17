@@ -1,205 +1,150 @@
-<center>
-    <h1> 基于Springboot + Vue 开发的前后端分离博客 </h1>
-</center>
+# 超伟博客 - 基于 Spring Boot + Vue 的前后端分离博客系统
 
-​     
-
-<img src="https://macwoss.oss-cn-beijing.aliyuncs.com/articles/679251cb5b766dd7a5f9c019d8bdcb10.png" alt="清如许的博客" style="zoom:25%;" />
-
-## 博客介绍
-
-<p >
-    本博客是参考 [风丶宇] 博客更新而成，感谢大佬提供的页面，然后定制新增部分功能，是个非常值得新手入门学习的Java规范化编程案例！
+<p align="center">
+  <img src="https://macwoss.oss-cn-beijing.aliyuncs.com/articles/679251cb5b766dd7a5f9c019d8bdcb10.png" alt="超伟博客" width="600" />
 </p>
-## 简介
 
-种一棵树最好的时间是十年前，或者现在！想做一件事别后悔为什么之前没去做，现在去依然不晚！
+<p align="center">
+  一个功能丰富的开源博客系统，采用 Spring Boot + Vue 前后端分离架构，集成 RBAC 权限管理、WebSocket 实时聊天、第三方 OAuth 登录、多策略搜索与文件上传等企业级特性，代码遵循阿里巴巴开发规范，适合新手入门学习 Java 规范化编程。
+</p>
 
+## 在线预览
 
+| 项目 | 地址 |
+|------|------|
+| 博客前台 | [www.macw.cc](https://www.macw.cc) |
+| 后台管理 | [blog.macw.cc](https://blog.macw.cc) |
+| 接口文档 | [www.macw.cc/api/doc.html](https://www.macw.cc/api/doc.html) |
+| Gitee 仓库 | [gitee.com/macw/blog](https://gitee.com/macw/blog) |
 
-## 在线地址
-
-**项目链接：** [https://www.macw.cc/](https://www.macw.cc)
-
-**后台链接：** [blog.macw.cc](https://blog.macw.cc)
-
-测试账号：test@qq.com，密码：1234567，可登入后台查看。
-
-
-**Gitee地址：** [https://gitee.com/macw/blog](https://gitee.com/macw/blog)
-
-**在线接口文档地址：** [https://www.macw.cc/api/doc.html](https://www.macw.cc/api/doc.html)
-
-您的star是我坚持的动力，感谢大家的支持，欢迎提交pr共同改进项目。
-
-## 更新内容
-- 更新博客图片为接口自动刷新获取
-- 说说首页滚动框优化，截取第一行前n个字符展示
-- 优化部分页面样式，新增部分自动化接口调用
-- 首页右下角新增[摸鱼日历]接口等
-- 后台系统配置更新
-- 添加个人网盘菜单
-- 点赞功能更新为无需登录点赞，通过cookie刷新记录
-- 游客头像取消默认黑白，改为自动刷新
-- 友链页面优化，添加博客地址说明等
-- 新增文章发布页添加文章附件功能
-- 添加谷歌广告
-- 添加博客首页天气标签
-- 添加百度收录
-- 添加CSDN爬虫导入文章
-
-
-## 后续更新计划
-- ~~添加博客文章页面，可以添加附件功能等~~【已完成】
-- 添加微信公众号菜单配置功能
-- ~~添加百度收录SEO等~~【已完成】
-- ~~添加博客页面广告接入，后台配置等~~【已完成】
-- 博客首页多主题配置等
-- 其他问题收集中，欢迎博客页留言
-
-敬请期待。。。。。。。。。。。。。。。。。。
-
-
-## 系统目录结构
-
-前端项目位于blog-vue下，blog为前台，admin为后台。
-
-后端项目位于blog-springboot下。
-
-SQL文件位于根目录下的blog-mysql8.sql，需要MYSQL8以上版本。
-
-可直接导入该项目于本地，修改后端配置文件中的数据库等连接信息，项目中使用到的关于阿里云功能和第三方授权登录等需要自行开通。
-
-当你克隆项目到本地后可使用邮箱账号：admin@qq.com，密码：1234567 进行登录，也可自行注册账号并将其修改为admin角色。
-
-本地访问接口文档地址：[http://127.0.0.1:8080/doc.html](http://127.0.0.1:8080/doc.html)
-
-**ps：请先运行后端项目，再启动前端项目，前端项目配置由后端动态加载。** 
-
-```
-blog-springboot
-├── annotation    --  自定义注解
-├── aspect        --  aop模块
-├── config        --  配置模块
-├── constant      --  常量模块
-├── consumer      --  MQ消费者模块
-├── controller    --  控制器模块
-├── dao           --  框架核心模块
-├── dto           --  dto模块
-├── enums         --  枚举模块
-├── exception     --  自定义异常模块
-├── handler       --  处理器模块（扩展Security过滤器，自定义Security提示信息等）
-├── service       --  服务模块
-├── strategy      --  策略模块（用于扩展第三方登录，搜索模式，上传文件模式等策略）
-├── util          --  工具类模块
-└── vo            --  vo模块
-```
+> 测试账号：`test@qq.com` / `1234567`，可登录后台体验。
 
 ## 项目特点
 
-- 前台参考"Hexo"的"Butterfly"设计，美观简洁，响应式体验好。
-- 后台参考"element-admin"设计，侧边栏，历史标签，面包屑自动生成。
-- 采用Markdown编辑器，写法简单。
-- 评论支持表情输入回复等，样式参考Valine。
-- 添加音乐播放器，支持在线搜索歌曲。
-- 前后端分离部署，适应当前潮流。
-- 接入第三方登录，减少注册成本。
-- 支持发布说说，随时分享趣事。
-- 留言采用弹幕墙，更加炫酷。
-- 支持代码高亮和复制，图片预览，深色模式等功能，提升用户体验。
-- 搜索文章支持高亮分词，响应速度快。
-- 新增文章目录、推荐文章等功能，优化用户体验。
-- 新增在线聊天室，支持撤回、语音输入、统计未读数量等功能。
-- 新增aop注解实现日志管理。  
-- 支持动态权限修改，采用RBAC模型，前端菜单和后台权限实时更新。
-- 后台管理支持修改背景图片，博客配置等信息，操作简单，支持上传相册。
-- 代码支持多种搜索模式（Elasticsearch或MYSQL），支持多种上传模式（OSS或本地），可支持配置。
-- 代码遵循阿里巴巴开发规范，利于开发者学习。
+- 前台参考 Hexo Butterfly 主题设计，响应式布局，支持深色模式
+- 后台参考 Element Admin 设计，侧边栏 + 面包屑 + 历史标签自动生成
+- Markdown 编辑器，支持代码高亮、复制、图片预览
+- 评论支持表情回复，样式参考 Valine
+- 集成在线音乐播放器，支持搜索歌曲
+- 支持 QQ、微博第三方登录
+- 发布说说、弹幕墙留言、在线聊天室
+- RBAC 动态权限管理，前端菜单和后台权限实时更新
+- 多种搜索模式（Elasticsearch / MySQL）、多种上传方式（OSS / COS / 本地）可配置
+- AOP 注解实现操作日志管理
+- 代码遵循阿里巴巴开发规范
 
-## 技术介绍
+## 技术栈
 
-**前端：** vue + vuex + vue-router + axios + vuetify + element + echarts
+| 层级 | 技术 |
+|------|------|
+| 前端 | Vue 2、Vuex、Vue Router、Axios、Vuetify（前台）、Element UI（后台）、ECharts |
+| 后端 | Spring Boot 2.4、Spring Security、MyBatis-Plus、WebSocket |
+| 数据库 | MySQL 8、Redis、Elasticsearch（可选） |
+| 消息队列 | RabbitMQ + MaxWell |
+| 其他 | Knife4j（API 文档）、阿里云 OSS、腾讯云 COS、QQ / 微博 OAuth |
 
-**后端：** SpringBoot + nginx + docker + SpringSecurity + Swagger2 + MyBatisPlus + Mysql + Redis + elasticsearch + RabbitMQ + MaxWell + Websocket
+## 项目结构
 
-**其他：** 接入QQ，微博第三方登录，接入腾讯云人机验证、websocket
-
-## 运行环境
-
-**服务器：** 腾讯云2核4G CentOS7.6
-
-**CDN：** 阿里云全站加速
-
-**对象存储：** 阿里云OSS
-
-这套搭配响应速度非常快，可以做到响应100ms以下。
-
-**最低配置：** 1核2G服务器（关闭ElasticSearch）
-
-## 开发环境
-
-|开发工具|说明|
-|-|-|
-|IDEA|Java开发工具IDE|
-|VSCode|Vue开发工具IDE|
-|Navicat|MySQL远程连接工具|
-|Another Redis Desktop Manager|Redis远程连接工具|
-|X-shell|Linux远程连接工具|
-|Xftp|Linux文件上传工具|
-
-|开发环境|版本|
-|-|-|
-|JDK|1.8|
-|MySQL|8.0.20|
-|Redis|6.0.5|
-|Elasticsearch|7.9.2|
-|RabbitMQ|3.8.5|
-
-## 项目截图
-
-![img.png](https://macwoss.oss-cn-beijing.aliyuncs.com/photos/20a95856b49fada7fc983e58f07e9d52.png)
-![img.png](img/img.png)
-![img_1.png](img/img_1.png)
-![img_2.png](img/img_2.png)
-![img_3.png](img/img_3.png)
-![img_4.png](img/img_4.png)
+```
+blog/
+├── blog-springboot/          # 后端 Spring Boot 项目
+│   ├── annotation/           #   自定义注解
+│   ├── aspect/               #   AOP 切面
+│   ├── config/               #   配置类（Security、Redis、MQ、WebSocket 等）
+│   ├── constant/             #   常量定义
+│   ├── consumer/             #   MQ 消费者
+│   ├── controller/           #   REST 控制器
+│   ├── dao/                  #   MyBatis-Plus Mapper
+│   ├── dto/                  #   数据传输对象
+│   ├── enums/                #   枚举类
+│   ├── exception/            #   自定义异常
+│   ├── handler/              #   Security 过滤器 & 自定义提示
+│   ├── service/              #   业务逻辑（接口 + 实现）
+│   ├── strategy/             #   策略模式（搜索、上传、登录、文章导入）
+│   ├── util/                 #   工具类
+│   └── vo/                   #   视图对象
+├── blog-vue/
+│   ├── blog/                 # 前台博客（Vue + Vuetify）
+│   └── admin/                # 后台管理（Vue + Element UI）
+├── blog-mysql8.sql           # 数据库初始化脚本（MySQL 8+）
+└── README.md
+```
 
 ## 快速开始
 
-### 项目环境安装
+### 环境要求
 
-详见文章[Docker安装运行环境](https://www.macw.cc/articles/126)
+| 环境 | 版本 |
+|------|------|
+| JDK | 1.8 |
+| MySQL | 8.0+ |
+| Redis | 6.0+ |
+| Node.js | 12+ |
+| Elasticsearch | 7.9+（可选，关闭搜索模式可不安装） |
+| RabbitMQ | 3.8+（可选） |
 
-### 项目配置
+### 1. 初始化数据库
 
-详见文章[项目配置教程](https://www.macw.cc/articles/124)
+```bash
+mysql -u root -p < blog-mysql8.sql
+```
 
-### Docker部署项目
+### 2. 启动后端
 
-详见文章[项目部署教程](https://www.macw.cc/articles/123)
+```bash
+cd blog-springboot
+# 修改 application-dev.yml 中的数据库、Redis 等连接信息
+mvn spring-boot:run
+```
 
-**提别推荐：使用宝塔部署更为方便！！！**
+启动后访问 [http://localhost:8080/doc.html](http://localhost:8080/doc.html) 查看接口文档。
+
+### 3. 启动前台
+
+```bash
+cd blog-vue/blog
+npm install
+npm run serve
+```
+
+访问 [http://localhost:8081](http://localhost:8081)。
+
+### 4. 启动后台（可选）
+
+```bash
+cd blog-vue/admin
+npm install
+npm run serve
+```
+
+> **注意：** 请先启动后端，再启动前端。前端配置由后端 API 动态加载。
+
+默认登录账号：`admin@qq.com` / `1234567`
+
+## 部署
+
+- Docker 部署教程：[项目部署教程](https://www.macw.cc/articles/123)
+- 环境安装教程：[Docker 安装运行环境](https://www.macw.cc/articles/126)
+- 项目配置教程：[项目配置教程](https://www.macw.cc/articles/124)
+
+> 推荐使用宝塔面板部署，更加便捷。
+
+## 截图
+
+<p align="center">
+  <img src="https://macwoss.oss-cn-beijing.aliyuncs.com/photos/20a95856b49fada7fc983e58f07e9d52.png" alt="首页" width="800" />
+</p>
 
 ## 注意事项
 
-- 项目拉下来运行后，可到后台管理页面网站配置处修改博客相关信息.
-- 邮箱配置，第三方授权配置需要自己申请。
-- ElasticSearch需要自己先创建索引，项目运行环境教程中有介绍。
+- 运行后可在后台「网站配置」处修改博客名称、头像等信息
+- 邮箱配置和第三方登录（QQ / 微博）需要自行申请
+- Elasticsearch 需先创建索引，详见项目运行环境教程
+- 本地上传模式需要配置 Nginx 映射
 
-## 项目总结
+## 交流
 
-博客作为新手入门项目是十分不错的，项目所用的技术栈覆盖的也比较广，适合初学者学习。主要难点在于权限管理、第三方登录、websocket这块。做的不好的地方请大家见谅，有问题的或者有好的建议可以私聊联系我。
+- QQ：1055215129
+- 欢迎提交 Issue 和 PR
 
-## 交流QQ
-<img src="img/qq群.png" alt="img.png" style="zoom: 33%;" align="left"/>
-
-
-
-QQ：1055215129
-
-欢迎各位大佬发邮箱进行博客问题沟通，也欢迎各位去博客留言页进行留言，每一条留言我都会认真看并且回复，感谢支持！！！
-
-
-
-
-
+如果觉得不错，欢迎 Star 支持！
