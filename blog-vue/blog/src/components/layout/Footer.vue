@@ -18,7 +18,6 @@
 </template>
 
 <script>
-import axios from "axios";
 
 export default {
   data: function() {
@@ -28,16 +27,7 @@ export default {
     };
   },
   mounted: function() {
-    axios
-      .get("https://api.vvhan.com/api/en", {
-        params: {
-          type: "sj"
-        }
-      })
-      .then(({ data }) => {
-        this.chinese = data.data.zh;
-        this.english = data.data.en;
-      });
+    // 每日一句已关闭（api.vvhan.com 不可用）
   },
   computed: {
     isMessage() {

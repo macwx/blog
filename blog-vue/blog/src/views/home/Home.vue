@@ -475,7 +475,8 @@ export default {
     },
     isShowSocial() {
       return function (social) {
-        return this.blogInfo.websiteConfig.socialUrlList.indexOf(social) != -1;
+        var list = this.blogInfo.websiteConfig.socialUrlList;
+        return list && list.indexOf(social) != -1;
       };
     },
     cover() {

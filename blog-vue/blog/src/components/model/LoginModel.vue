@@ -89,11 +89,11 @@ export default {
       return true;
     },
     socialLoginList() {
-      return this.$store.state.blogInfo.websiteConfig.socialLoginList;
+      return this.$store.state.blogInfo.websiteConfig.socialLoginList || [];
     },
     showLogin() {
       return function(type) {
-        return this.socialLoginList.indexOf(type) != -1;
+        return this.socialLoginList && this.socialLoginList.indexOf(type) != -1;
       };
     }
   },
