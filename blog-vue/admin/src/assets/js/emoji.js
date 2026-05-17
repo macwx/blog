@@ -1,115 +1,137 @@
 export default {
-  "[微笑]": "https://static.talkxj.com/emoji/smile.jpg",
+  "[微笑]": "https://file.macw.cc/blog/emoji/qqPng/1.png",
 
-  "[笑]": " https://static.talkxj.com/emoji/dx.jpg",
+  "[撇嘴]": "https://file.macw.cc/blog/emoji/qqPng/2.png",
 
-  "[呲牙]": "https://static.talkxj.com/emoji/cy.jpg",
+  "[尴尬]": "https://file.macw.cc/blog/emoji/qqPng/3.png",
 
-  "[OK]": "https://static.talkxj.com/emoji/ok.jpg",
+  "[皱眉]": "https://file.macw.cc/blog/emoji/qqPng/4.png",
 
-  "[星星眼]": "https://static.talkxj.com/emoji/xxy.jpg",
+  "[吐血]": "https://file.macw.cc/blog/emoji/qqPng/5.png",
 
-  "[哦呼]": "https://static.talkxj.com/emoji/oh.jpg",
+  "[奸笑]": "https://file.macw.cc/blog/emoji/qqPng/6.png",
 
-  "[嫌弃]": "https://static.talkxj.com/emoji/xq.jpg",
+  "[傲慢]": "https://file.macw.cc/blog/emoji/qqPng/7.png",
 
-  "[喜欢]": "https://static.talkxj.com/emoji/xh.jpg",
+  "[震惊]": "https://file.macw.cc/blog/emoji/qqPng/8.png",
 
-  "[酸了]": "https://static.talkxj.com/emoji/sl.jpg",
+  "[戳你]": "https://file.macw.cc/blog/emoji/qqPng/9.png",
 
-  "[大哭]": "https://static.talkxj.com/emoji/dq.jpg?",
+  "[开心]": "https://file.macw.cc/blog/emoji/qqPng/10.png",
 
-  "[害羞]": "https://static.talkxj.com/emoji/hx.jpg",
+  "[调皮]": "https://file.macw.cc/blog/emoji/qqPng/11.png",
 
-  "[无语]": "https://static.talkxj.com/emoji/wy.jpg",
+  "[苦笑]": "https://file.macw.cc/blog/emoji/qqPng/12.png",
 
-  "[疑惑]": "https://static.talkxj.com/emoji/yh.jpg",
+  "[发火]": "https://file.macw.cc/blog/emoji/qqPng/13.png",
 
-  "[调皮]": "https://static.talkxj.com/emoji/tiaopi.jpg",
+  "[吐舌]": "https://file.macw.cc/blog/emoji/qqPng/14.png",
 
-  "[笑哭]": "https://static.talkxj.com/emoji/xiaoku.jpg",
+  "[呲牙]": "https://file.macw.cc/blog/emoji/qqPng/15.png",
 
-  "[奸笑]": "https://static.talkxj.com/emoji/jianxiao.jpg",
+  "[惊讶]": "https://file.macw.cc/blog/emoji/qqPng/16.png",
 
-  "[偷笑]": "https://static.talkxj.com/emoji/touxiao.jpg",
+  "[难过]": "https://file.macw.cc/blog/emoji/qqPng/17.png",
 
-  "[大笑]": "https://static.talkxj.com/emoji/daxiao.jpg",
+  "[酷]": "https://file.macw.cc/blog/emoji/qqPng/18.png",
 
-  "[阴险]": "https://static.talkxj.com/emoji/yinxian.jpg",
+  "[冷汗]": "https://file.macw.cc/blog/emoji/qqPng/19.png",
 
-  "[捂脸]": "https://static.talkxj.com/emoji/wulian.jpg",
+  "[抓狂]": "https://file.macw.cc/blog/emoji/qqPng/20.png",
 
-  "[呆]": "https://static.talkxj.com/emoji/dai.jpg",
+  "[恶心]": "https://file.macw.cc/blog/emoji/qqPng/21.png",
 
-  "[抠鼻]": "https://static.talkxj.com/emoji/koubi.jpg",
+  "[色]": "https://file.macw.cc/blog/emoji/qqPng/22.png",
 
-  "[惊喜]": "https://static.talkxj.com/emoji/jingxi.jpg",
+  "[偷笑]": "https://file.macw.cc/blog/emoji/qqPng/23.png",
 
-  "[惊讶]": "https://static.talkxj.com/emoji/jingya.jpg",
+  "[可爱]": "https://file.macw.cc/blog/emoji/qqPng/24.png",
 
-  "[捂脸哭]": "https://static.talkxj.com/emoji/wulianku.jpg",
+  "[白眼]": "https://file.macw.cc/blog/emoji/qqPng/25.png",
 
-  "[妙啊]": "https://static.talkxj.com/emoji/miaoa.jpg",
+  "[哼]": "https://file.macw.cc/blog/emoji/qqPng/26.png",
 
-  "[狗头]": "https://static.talkxj.com/emoji/goutou.jpg",
+  "[好吃]": "https://file.macw.cc/blog/emoji/qqPng/27.png",
 
-  "[滑稽]": "https://static.talkxj.com/emoji/huaji.jpg",
+  "[困]": "https://file.macw.cc/blog/emoji/qqPng/28.png",
 
-  "[吃瓜]": "https://static.talkxj.com/emoji/chigua.jpg",
+  "[害怕]": "https://file.macw.cc/blog/emoji/qqPng/29.png",
 
-  "[打call]": "https://static.talkxj.com/emoji/dacall.jpg",
+  "[无语]": "https://file.macw.cc/blog/emoji/qqPng/30.png",
 
-  "[点赞]": "https://static.talkxj.com/emoji/dianzan.jpg",
+  "[憨笑]": "https://file.macw.cc/blog/emoji/qqPng/31.png",
 
-  "[鼓掌]": "https://static.talkxj.com/emoji/guzhang.jpg",
+  "[绿帽]": "https://file.macw.cc/blog/emoji/qqPng/32.png",
 
-  "[尴尬]": "https://static.talkxj.com/emoji/ganga.jpg",
+  "[鼻涕]": "https://file.macw.cc/blog/emoji/qqPng/33.png",
 
-  "[冷]": "https://static.talkxj.com/emoji/leng.jpg",
+  "[努力]": "https://file.macw.cc/blog/emoji/qqPng/34.png",
 
-  "[灵魂出窍]": "https://static.talkxj.com/emoji/linghunchuqiao.jpg",
+  "[骂人]": "https://file.macw.cc/blog/emoji/qqPng/35.png",
 
-  "[委屈]": "https://static.talkxj.com/emoji/weiqu.jpg",
+  "[疑问]": "https://file.macw.cc/blog/emoji/qqPng/36.png",
 
-  "[傲娇]": "https://static.talkxj.com/emoji/aojiao.jpg",
+  "[嘘]": "https://file.macw.cc/blog/emoji/qqPng/37.png",
 
-  "[疼]": "https://static.talkxj.com/emoji/teng.jpg",
+  "[晕]": "https://file.macw.cc/blog/emoji/qqPng/38.png",
 
-  "[吓]": "https://static.talkxj.com/emoji/xia.jpg?",
+  "[狂]": "https://file.macw.cc/blog/emoji/qqPng/39.png",
 
-  "[生病]": "https://static.talkxj.com/emoji/shengbing.jpg",
+  "[衰]": "https://file.macw.cc/blog/emoji/qqPng/40.png",
 
-  "[吐]": "https://static.talkxj.com/emoji/tu.jpg",
+  "[骷颅]": "https://file.macw.cc/blog/emoji/qqPng/41.png",
 
-  "[嘘声]": "https://static.talkxj.com/emoji/xusheng.jpg",
+  "[敲头]": "https://file.macw.cc/blog/emoji/qqPng/42.png",
 
-  "[捂眼]": "https://static.talkxj.com/emoji/wuyan.jpg",
+  "[拜拜]": "https://file.macw.cc/blog/emoji/qqPng/43.png",
 
-  "[思考]": "https://static.talkxj.com/emoji/sikao.jpg",
+  "[帅]": "https://file.macw.cc/blog/emoji/qqPng/44.png",
 
-  "[再见]": "https://static.talkxj.com/emoji/zaijian.jpg",
+  "[擦汗]": "https://file.macw.cc/blog/emoji/qqPng/45.png",
 
-  "[翻白眼]": "https://static.talkxj.com/emoji/fanbaiyan.jpg",
+  "[抠鼻]": "https://file.macw.cc/blog/emoji/qqPng/46.png",
 
-  "[哈欠]": "https://static.talkxj.com/emoji/haqian.jpg",
+  "[鼓掌]": "https://file.macw.cc/blog/emoji/qqPng/47.png",
 
-  "[奋斗]": "https://static.talkxj.com/emoji/fengdou.jpg",
+  "[糗大了]": "https://file.macw.cc/blog/emoji/qqPng/48.png",
 
-  "[墨镜]": "https://static.talkxj.com/emoji/mojing.jpg",
+  "[坏笑]": "https://file.macw.cc/blog/emoji/qqPng/49.png",
 
-  "[撇嘴]": "https://static.talkxj.com/emoji/piezui.jpg",
+  "[左哼哼]": "https://file.macw.cc/blog/emoji/qqPng/50.png",
 
-  "[难过]": "https://static.talkxj.com/emoji/nanguo.jpg",
+  "[右哼哼]": "https://file.macw.cc/blog/emoji/qqPng/51.png",
 
-  "[抓狂]": "https://static.talkxj.com/emoji/zhuakuang.jpg",
+  "[哈欠]": "https://file.macw.cc/blog/emoji/qqPng/52.png",
 
-  "[生气]": "https://static.talkxj.com/emoji/shengqi.jpg",
+  "[鄙视]": "https://file.macw.cc/blog/emoji/qqPng/53.png",
 
-  "[爱心]": "https://static.talkxj.com/emoji/aixin.jpg",
+  "[委屈]": "https://file.macw.cc/blog/emoji/qqPng/54.png",
 
-  "[胜利]": "https://static.talkxj.com/emoji/shengli.jpg",
+  "[大哭]": "https://file.macw.cc/blog/emoji/qqPng/55.png",
 
-  "[保佑]": "https://static.talkxj.com/emoji/baoyou.jpg",
+  "[快哭了]": "https://file.macw.cc/blog/emoji/qqPng/56.png",
 
-  "[支持]": "https://static.talkxj.com/emoji/zhichi.jpg"
+  "[阴险]": "https://file.macw.cc/blog/emoji/qqPng/57.png",
+
+  "[亲亲]": "https://file.macw.cc/blog/emoji/qqPng/58.png",
+
+  "[吃惊]": "https://file.macw.cc/blog/emoji/qqPng/59.png",
+
+  "[可怜]": "https://file.macw.cc/blog/emoji/qqPng/60.png",
+
+  "[摆手]": "https://file.macw.cc/blog/emoji/qqPng/106.png",
+
+  "[惨哭]": "https://file.macw.cc/blog/emoji/qqPng/107.png",
+
+  "[无奈]": "https://file.macw.cc/blog/emoji/qqPng/108.png",
+
+  "[呵呵]": "https://file.macw.cc/blog/emoji/qqPng/109.png",
+
+  "[捂脸]": "https://file.macw.cc/blog/emoji/qqPng/110.png",
+
+  "[机智]": "https://file.macw.cc/blog/emoji/qqPng/112.png",
+
+  "[耶]": "https://file.macw.cc/blog/emoji/qqPng/114.png",
+
+  "[嘿哈]": "https://file.macw.cc/blog/emoji/qqPng/115.png"
 };

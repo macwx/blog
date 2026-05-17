@@ -62,4 +62,14 @@
   border-radius: 0.5rem;
   background-color: rgba(144, 147, 153, 0.3);
 }
+@media (max-width: 767px) {
+  .side-nav-bar:not(.el-menu--collapse) {
+    width: 210px;
+  }
+  .el-menu--collapse {
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+}
 </style>

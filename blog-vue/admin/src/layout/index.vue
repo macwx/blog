@@ -1,7 +1,13 @@
 <template>
   <el-container>
+    <!-- 移动端遮罩 -->
+    <div
+      v-if="isMobile && !$store.state.collapse"
+      class="sidebar-overlay"
+      @click="$store.commit('trigger')"
+    />
     <!-- 侧边栏 -->
-    <el-aside width="auto">
+    <el-aside width="auto" :class="{ 'mobile-sidebar': isMobile }">
       <SideBar />
     </el-aside>
     <el-container :class="'main-container ' + isHide">
@@ -29,6 +35,26 @@ export default {
     NavBar,
     SideBar
   },
+  data() {
+    return {
+      isMobile: false
+    };
+  },
+  created() {
+    this.checkMobile();
+    window.addEventListener("resize", this.checkMobile);
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.checkMobile);
+  },
+  methods: {
+    checkMobile() {
+      this.isMobile = document.documentElement.clientWidth < 768;
+      if (this.isMobile && !this.$store.state.collapse) {
+        this.$store.commit("trigger");
+      }
+    }
+  },
   computed: {
     isHide() {
       return this.$store.state.collapse ? "hideSideBar" : "";
@@ -45,6 +71,22 @@ export default {
 }
 .hideSideBar {
   margin-left: 64px;
+}
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+}
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  height: 100%;
 }
 .fade-transform-enter-active,
 .fade-transform-leave-active {
@@ -64,5 +106,10 @@ export default {
   bottom: 0px;
   width: 100%;
   overflow: hidden;
+}
+@media (max-width: 767px) {
+  .main-container {
+    margin-left: 0 !important;
+  }
 }
 </style>

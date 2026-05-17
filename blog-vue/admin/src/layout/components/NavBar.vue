@@ -269,4 +269,18 @@ export default {
   border-radius: 0.5rem;
   background-color: rgba(144, 147, 153, 0.3);
 }
+@media (max-width: 767px) {
+  .hambuger-container {
+    margin-right: 10px;
+  }
+  .el-breadcrumb {
+    display: none;
+  }
+  .screen-full {
+    display: none;
+  }
+  .nav-bar {
+    padding-right: 15px;
+  }
+}
 </style>
