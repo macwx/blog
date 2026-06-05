@@ -40,51 +40,48 @@
   </v-dialog>
 </template>
 
-<script>
-export default {
-  data: function() {
-    return {
-      keywords: "",
-      articleList: [],
-      flag: false
-    };
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+
+const store = useBlogStore();
+const router = useRouter();
+
+const keywords = ref("");
+const articleList = ref([]);
+const flag = ref(false);
+
+const searchFlag = computed({
+  get() {
+    return store.searchFlag;
   },
-  methods: {
-    goTo(articleId) {
-      this.$store.state.searchFlag = false;
-      this.$router.push({ path: "/articles/" + articleId });
-    }
+  set(value) {
+    store.searchFlag = value;
   },
-  computed: {
-    searchFlag: {
-      set(value) {
-        this.$store.state.searchFlag = value;
-      },
-      get() {
-        return this.$store.state.searchFlag;
-      }
-    },
-    isMobile() {
-      const clientWidth = document.documentElement.clientWidth;
-      if (clientWidth > 960) {
-        return false;
-      }
-      return true;
-    }
-  },
-  watch: {
-    keywords(value) {
-      this.flag = value.trim() != "" ? true : false;
-      this.axios
-        .get("/api/articles/search", {
-          params: { current: 1, keywords: value }
-        })
-        .then(({ data }) => {
-          this.articleList = data.data;
-        });
-    }
-  }
-};
+});
+
+const isMobile = computed(() => {
+  const clientWidth = document.documentElement.clientWidth;
+  return clientWidth <= 960;
+});
+
+watch(keywords, (value) => {
+  flag.value = value.trim() !== "";
+  axios
+    .get("/api/articles/search", {
+      params: { current: 1, keywords: value },
+    })
+    .then(({ data }) => {
+      articleList.value = data.data;
+    });
+});
+
+function goTo(articleId) {
+  store.searchFlag = false;
+  router.push({ path: "/articles/" + articleId });
+}
 </script>
 
 <style scoped>

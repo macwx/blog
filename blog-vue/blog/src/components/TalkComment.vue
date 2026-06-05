@@ -6,12 +6,12 @@
       <div style="display:flex;width:100%">
         <v-avatar size="36">
           <img
-            v-if="this.$store.state.avatar"
-            :src="this.$store.state.avatar"
+            v-if="store.avatar"
+            :src="store.avatar"
           />
           <img
             v-else
-            :src="this.$store.state.blogInfo.websiteConfig.touristAvatar"
+            :src="store.blogInfo.websiteConfig.touristAvatar"
           />
         </v-avatar>
         <div style="width:100%" class="ml-3">
@@ -73,7 +73,7 @@
             <!-- 楼层 -->
             <span style="margin-right:10px">{{ count - index }}楼</span>
             <!-- 发表时间 -->
-            <span style="margin-right:10px">{{ item.createTime | date }}</span>
+            <span style="margin-right:10px">{{ formatDate(item.createTime) }}</span>
             <!-- 点赞 -->
             <span
               :class="isLike(item.id) + ' iconfont icondianzan'"
@@ -112,7 +112,7 @@
               <div class="comment-info">
                 <!-- 发表时间 -->
                 <span style="margin-right:10px">
-                  {{ reply.createTime | date }}
+                  {{ formatDate(reply.createTime) }}
                 </span>
                 <!-- 点赞 -->
                 <span
@@ -140,7 +140,7 @@
                   >
                     @{{ reply.replyNickname }}
                   </a>
-                  ，
+                  ,
                 </template>
                 <span v-html="reply.commentContent" />
               </p>
@@ -151,7 +151,7 @@
             class="mb-3"
             style="font-size:0.75rem;color:#6d757a"
             v-show="item.replyCount > 3"
-            ref="check"
+            :ref="el => { if (el) checkRefs[index] = el }"
           >
             共
             <b>{{ item.replyCount }}</b>
@@ -167,13 +167,13 @@
           <div
             class="mb-3"
             style="font-size:0.75rem;color:#222;display:none"
-            ref="paging"
+            :ref="el => { if (el) pagingRefs[index] = el }"
           >
             <span style="padding-right:10px">
               共{{ Math.ceil(item.replyCount / 5) }}页
             </span>
             <paging
-              ref="page"
+              :ref="el => { if (el) pageRefs[index] = el }"
               :totalPage="Math.ceil(item.replyCount / 5)"
               :index="index"
               :commentId="item.id"
@@ -181,12 +181,12 @@
             />
           </div>
           <!-- 回复框 -->
-          <Reply :type="type" ref="reply" @reloadReply="reloadReply" />
+          <Reply :type="type" :ref="el => { if (el) replyRefs[index] = el }" @reloadReply="reloadReply" />
         </div>
       </div>
       <!-- 加载按钮 -->
       <div class="load-wrapper">
-        <v-btn outlined v-if="count > commentList.length" @click="listComments">
+        <v-btn variant="outlined" v-if="count > commentList.length" @click="listComments">
           加载更多...
         </v-btn>
       </div>
@@ -198,217 +198,238 @@
   </div>
 </template>
 
-<script>
-import Reply from "./Reply";
-import Paging from "./Paging";
-import Emoji from "./Emoji";
+<script setup>
+import { ref, reactive, watch, nextTick, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
+import Reply from "./Reply.vue";
+import Paging from "./Paging.vue";
+import Emoji from "./Emoji.vue";
 import EmojiList from "../assets/js/emoji";
-export default {
-  components: {
-    Reply,
-    Emoji,
-    Paging
-  },
-  props: {
-    type: {
-      type: Number
+
+const store = useBlogStore();
+const route = useRoute();
+const toast = useToast();
+
+const props = defineProps({
+  type: {
+    type: Number
+  }
+});
+
+const emit = defineEmits(["getCommentCount"]);
+
+// Template refs
+const replyRefs = reactive({});
+const checkRefs = reactive({});
+const pagingRefs = reactive({});
+const pageRefs = reactive({});
+
+const reFresh = ref(true);
+const commentContent = ref("");
+const chooseEmoji = ref(false);
+const current = ref(1);
+const commentList = ref([]);
+const count = ref(0);
+
+function formatDate(time) {
+  // TODO: Vue3 migration - replaced | date filter
+  return time;
+}
+
+function isLike(commentId) {
+  return store.commentLikeSet.indexOf(commentId) != -1 ? "like-active" : "like";
+}
+
+function replyComment(index, item) {
+  Object.values(replyRefs).forEach(ref => {
+    if (ref && ref.replyRef) {
+      ref.replyRef.style.display = "none";
     }
-  },
-  created() {
-    this.listComments();
-  },
-  data: function() {
-    return {
-      reFresh: true,
-      commentContent: "",
-      chooseEmoji: false,
-      current: 1,
-      commentList: [],
-      count: 0
-    };
-  },
-  methods: {
-    replyComment(index, item) {
-      this.$refs.reply.forEach(item => {
-        item.$el.style.display = "none";
-      });
-      //传值给回复框
-      this.$refs.reply[index].commentContent = "";
-      this.$refs.reply[index].nickname = item.nickname;
-      this.$refs.reply[index].replyUserId = item.userId;
-      this.$refs.reply[index].parentId = this.commentList[index].id;
-      this.$refs.reply[index].chooseEmoji = false;
-      this.$refs.reply[index].index = index;
-      this.$refs.reply[index].$el.style.display = "block";
-    },
-    addEmoji(key) {
-      this.commentContent += key;
-    },
-    checkReplies(index, item) {
-      this.axios
-        .get("/api/comments/" + item.id + "/replies", {
-          params: { current: 1, size: 5 }
-        })
-        .then(({ data }) => {
-          this.$refs.check[index].style.display = "none";
-          item.replyDTOList = data.data;
-          //超过1页才显示分页
-          if (Math.ceil(item.replyCount / 5) > 1) {
-            this.$refs.paging[index].style.display = "flex";
-          }
-        });
-    },
-    changeReplyCurrent(current, index, commentId) {
-      //查看下一页回复
-      this.axios
-        .get("/api/comments/" + commentId + "/replies", {
-          params: { current: current, size: 5 }
-        })
-        .then(({ data }) => {
-          this.commentList[index].replyDTOList = data.data;
-        });
-    },
-    listComments() {
-      //查看评论
-      const path = this.$route.path;
-      const arr = path.split("/");
-      var param = {
-        current: this.current,
-        type: this.type
-      };
-      switch (this.type) {
-        case 1:
-        case 3:
-          param.topicId = arr[2];
-          break;
-        default:
-          break;
-      }
-      this.axios
-        .get("/api/comments", {
-          params: param
-        })
-        .then(({ data }) => {
-          if (this.current == 1) {
-            this.commentList = data.data.recordList;
-          } else {
-            this.commentList.push(...data.data.recordList);
-          }
-          this.current++;
-          this.count = data.data.count;
-          this.$emit("getCommentCount", this.count);
-        });
-    },
-    insertComment() {
-      //判断登录
-      if (!this.$store.state.userId) {
-        this.$store.state.loginFlag = true;
-        return false;
-      }
-      //判空
-      if (this.commentContent.trim() == "") {
-        this.$toast({ type: "error", message: "评论不能为空" });
-        return false;
-      }
-      //解析表情
-      var reg = /\[.+?\]/g;
-      this.commentContent = this.commentContent.replace(reg, function(str) {
-        return (
-          "<img src= '" +
-          EmojiList[str] +
-          "' width='22'height='20' style='padding: 0 1px'/>"
-        );
-      });
-      //发送请求
-      const path = this.$route.path;
-      const arr = path.split("/");
-      var comment = {
-        commentContent: this.commentContent,
-        type: this.type
-      };
-      switch (this.type) {
-        case 1:
-        case 3:
-          comment.topicId = arr[2];
-          break;
-        default:
-          break;
-      }
-      this.commentContent = "";
-      this.axios.post("/api/comments", comment).then(({ data }) => {
-        if (data.flag) {
-          // 查询最新评论
-          this.current = 1;
-          this.listComments();
-          const isReview = this.$store.state.blogInfo.websiteConfig
-            .isCommentReview;
-          if (isReview) {
-            this.$toast({ type: "warnning", message: "评论成功，正在审核中" });
-          } else {
-            this.$toast({ type: "success", message: "评论成功" });
-          }
-        } else {
-          this.$toast({ type: "error", message: data.message });
-        }
-      });
-    },
-    like(comment) {
-      // 判断登录
-      if (!this.$store.state.userId) {
-        this.$store.state.loginFlag = true;
-        return false;
-      }
-      // 发送请求
-      this.axios
-        .post("/api/comments/" + comment.id + "/like")
-        .then(({ data }) => {
-          if (data.flag) {
-            // 判断是否点赞
-            if (this.$store.state.commentLikeSet.indexOf(comment.id) != -1) {
-              this.$set(comment, "likeCount", comment.likeCount - 1);
-            } else {
-              this.$set(comment, "likeCount", comment.likeCount + 1);
-            }
-            this.$store.commit("commentLike", comment.id);
-          }
-        });
-    },
-    reloadReply(index) {
-      this.axios
-        .get("/api/comments/" + this.commentList[index].id + "/replies", {
-          params: {
-            current: this.$refs.page[index].current
-          }
-        })
-        .then(({ data }) => {
-          this.commentList[index].replyCount++;
-          //回复大于5条展示分页
-          if (this.commentList[index].replyCount > 5) {
-            this.$refs.paging[index].style.display = "flex";
-          }
-          this.$refs.check[index].style.display = "none";
-          this.$refs.reply[index].$el.style.display = "none";
-          this.commentList[index].replyDTOList = data.data;
-        });
-    }
-  },
-  computed: {
-    isLike() {
-      return function(commentId) {
-        var commentLikeSet = this.$store.state.commentLikeSet;
-        return commentLikeSet.indexOf(commentId) != -1 ? "like-active" : "like";
-      };
-    }
-  },
-  watch: {
-    commentList() {
-      this.reFresh = false;
-      this.$nextTick(() => {
-        this.reFresh = true;
-      });
+  });
+  var replyComp = replyRefs[index];
+  if (replyComp) {
+    replyComp.commentContent = "";
+    replyComp.nickname = item.nickname;
+    replyComp.replyUserId = item.userId;
+    replyComp.parentId = commentList.value[index].id;
+    replyComp.chooseEmoji = false;
+    replyComp.index = index;
+    if (replyComp.replyRef) {
+      replyComp.replyRef.style.display = "block";
     }
   }
-};
+}
+
+function addEmoji(key) {
+  commentContent.value += key;
+}
+
+function checkReplies(index, item) {
+  axios
+    .get("/api/comments/" + item.id + "/replies", {
+      params: { current: 1, size: 5 }
+    })
+    .then(({ data }) => {
+      if (checkRefs[index]) {
+        checkRefs[index].style.display = "none";
+      }
+      item.replyDTOList = data.data;
+      if (Math.ceil(item.replyCount / 5) > 1) {
+        if (pagingRefs[index]) {
+          pagingRefs[index].style.display = "flex";
+        }
+      }
+    });
+}
+
+function changeReplyCurrent(currentVal, index, commentId) {
+  axios
+    .get("/api/comments/" + commentId + "/replies", {
+      params: { current: currentVal, size: 5 }
+    })
+    .then(({ data }) => {
+      commentList.value[index].replyDTOList = data.data;
+    });
+}
+
+function listComments() {
+  const path = route.path;
+  const arr = path.split("/");
+  var param = {
+    current: current.value,
+    type: props.type
+  };
+  switch (props.type) {
+    case 1:
+    case 3:
+      param.topicId = arr[2];
+      break;
+    default:
+      break;
+  }
+  axios
+    .get("/api/comments", {
+      params: param
+    })
+    .then(({ data }) => {
+      if (current.value == 1) {
+        commentList.value = data.data.recordList;
+      } else {
+        commentList.value.push(...data.data.recordList);
+      }
+      current.value++;
+      count.value = data.data.count;
+      emit("getCommentCount", count.value);
+    });
+}
+
+function insertComment() {
+  if (!store.userId) {
+    store.loginFlag = true;
+    return false;
+  }
+  if (commentContent.value.trim() == "") {
+    toast({ type: "error", message: "评论不能为空" });
+    return false;
+  }
+  var reg = /\[.+?\]/g;
+  commentContent.value = commentContent.value.replace(reg, function(str) {
+    return (
+      "<img src= '" +
+      EmojiList[str] +
+      "' width='22'height='20' style='padding: 0 1px'/>"
+    );
+  });
+  const path = route.path;
+  const arr = path.split("/");
+  var comment = {
+    commentContent: commentContent.value,
+    type: props.type
+  };
+  switch (props.type) {
+    case 1:
+    case 3:
+      comment.topicId = arr[2];
+      break;
+    default:
+      break;
+  }
+  commentContent.value = "";
+  axios.post("/api/comments", comment).then(({ data }) => {
+    if (data.flag) {
+      current.value = 1;
+      listComments();
+      const isReview = store.blogInfo.websiteConfig.isCommentReview;
+      if (isReview) {
+        toast({ type: "warnning", message: "评论成功，正在审核中" });
+      } else {
+        toast({ type: "success", message: "评论成功" });
+      }
+    } else {
+      toast({ type: "error", message: data.message });
+    }
+  });
+}
+
+function like(comment) {
+  if (!store.userId) {
+    store.loginFlag = true;
+    return false;
+  }
+  axios
+    .post("/api/comments/" + comment.id + "/like")
+    .then(({ data }) => {
+      if (data.flag) {
+        if (store.commentLikeSet.indexOf(comment.id) != -1) {
+          comment.likeCount = comment.likeCount - 1;
+        } else {
+          comment.likeCount = comment.likeCount + 1;
+        }
+        store.commentLike(comment.id);
+      }
+    });
+}
+
+function reloadReply(index) {
+  var pageComp = pageRefs[index];
+  var currentPage = pageComp ? pageComp.current : 1;
+  axios
+    .get("/api/comments/" + commentList.value[index].id + "/replies", {
+      params: {
+        current: currentPage
+      }
+    })
+    .then(({ data }) => {
+      commentList.value[index].replyCount++;
+      if (commentList.value[index].replyCount > 5) {
+        if (pagingRefs[index]) {
+          pagingRefs[index].style.display = "flex";
+        }
+      }
+      if (checkRefs[index]) {
+        checkRefs[index].style.display = "none";
+      }
+      var replyComp = replyRefs[index];
+      if (replyComp && replyComp.replyRef) {
+        replyComp.replyRef.style.display = "none";
+      }
+      commentList.value[index].replyDTOList = data.data;
+    });
+}
+
+watch(commentList, () => {
+  reFresh.value = false;
+  nextTick(() => {
+    reFresh.value = true;
+  });
+});
+
+onMounted(() => {
+  listComments();
+});
 </script>
 
 <style scoped>

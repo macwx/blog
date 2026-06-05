@@ -10,7 +10,7 @@
     <!-- 博主介绍 -->
     <div class="blogger-info">
       <v-avatar size="110" style="margin-bottom:0.5rem">
-        <img :src="this.$store.state.blogInfo.websiteConfig.websiteAvatar" />
+        <v-img :src="store.blogInfo.websiteConfig.websiteAvatar" />
       </v-avatar>
     </div>
     <!-- 博客信息 -->
@@ -19,7 +19,7 @@
         <router-link to="/archives">
           <div style="font-size: 0.875rem">文章</div>
           <div style="font-size: 1.125rem;">
-            {{ this.$store.state.blogInfo.articleCount }}
+            {{ store.blogInfo.articleCount }}
           </div>
         </router-link>
       </div>
@@ -27,7 +27,7 @@
         <router-link to="/categories">
           <div style="font-size: 0.875rem">分类</div>
           <div style="font-size: 1.125rem">
-            {{ this.$store.state.blogInfo.categoryCount }}
+            {{ store.blogInfo.categoryCount }}
           </div>
         </router-link>
       </div>
@@ -35,7 +35,7 @@
         <router-link to="/tags">
           <div style="font-size: 0.875rem">标签</div>
           <div style="font-size: 1.125rem">
-            {{ this.$store.state.blogInfo.tagCount }}
+            {{ store.blogInfo.tagCount }}
           </div>
         </router-link>
       </div>
@@ -93,7 +93,7 @@
           <i class="iconfont iconfaxian" /> 社区
         </router-link>
       </div>
-      <div class="menus-item" v-if="!this.$store.state.avatar">
+      <div class="menus-item" v-if="!store.avatar">
         <a @click="openLogin"><i class="iconfont icondenglu" /> 登录 </a>
       </div>
       <div v-else>
@@ -109,6 +109,46 @@
     </div>
   </v-navigation-drawer>
 </template>
+
+<script setup>
+import { computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
+import axios from "axios";
+
+const store = useBlogStore();
+const router = useRouter();
+const route = useRoute();
+const toast = useToast();
+
+const drawer = computed({
+  get() {
+    return store.drawer;
+  },
+  set(value) {
+    store.drawer = value;
+  }
+});
+
+function openLogin() {
+  store.loginFlag = true;
+}
+
+function logout() {
+  if (route.path === "/user") {
+    router.go(-1);
+  }
+  axios.get("/api/logout").then(({ data }) => {
+    if (data.flag) {
+      store.logout();
+      toast({ type: "success", message: "注销成功" });
+    } else {
+      toast({ type: "error", message: data.message });
+    }
+  });
+}
+</script>
 
 <style scoped>
 .blogger-info {
@@ -150,40 +190,3 @@ hr {
   }
 }
 </style>
-
-<script>
-export default {
-  computed: {
-    drawer: {
-      set(value) {
-        this.$store.state.drawer = value;
-      },
-      get() {
-        return this.$store.state.drawer;
-      }
-    },
-    isLogin() {
-      return this.$store.state.userId;
-    }
-  },
-  methods: {
-    openLogin() {
-      this.$store.state.loginFlag = true;
-    },
-    logout() {
-      //如果在个人中心则跳回上一页
-      if (this.$route.path == "/user") {
-        this.$router.go(-1);
-      }
-      this.axios.get("/api/logout").then(({ data }) => {
-        if (data.flag) {
-          this.$store.commit("logout");
-          this.$toast({ type: "success", message: "注销成功" });
-        } else {
-          this.$toast({ type: "error", message: data.message });
-        }
-      });
-    }
-  }
-};
-</script>

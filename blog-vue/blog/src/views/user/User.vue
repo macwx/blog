@@ -9,15 +9,18 @@
       </div>
       <v-row class="info-wrapper">
         <v-col md="3" cols="12">
-          <button id="pick-avatar">
+          <button id="pick-avatar" @click="triggerFileInput">
             <v-avatar size="140">
-              <img :src="this.$store.state.avatar" />
+              <img :src="store.avatar" />
             </v-avatar>
           </button>
-          <avatar-cropper
-            @uploaded="uploadAvatar"
-            trigger="#pick-avatar"
-            upload-url="/api/users/avatar"
+          <!-- TODO: Vue3 migration - vue-avatar-cropper removed, using simple file input -->
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/*"
+            style="display: none"
+            @change="uploadAvatar"
           />
         </v-col>
         <v-col md="7" cols="12">
@@ -45,75 +48,95 @@
               label="邮箱号"
               placeholder="请绑定邮箱"
             />
-            <v-btn v-if="email" text small @click="openEmailModel">
+            <v-btn v-if="email" variant="text" size="small" @click="openEmailModel">
               修改绑定
             </v-btn>
-            <v-btn v-else text small @click="openEmailModel">
+            <v-btn v-else variant="text" size="small" @click="openEmailModel">
               绑定邮箱
             </v-btn>
           </div>
-          <v-btn @click="updataUserInfo" outlined class="mt-5">修改</v-btn>
+          <v-btn @click="updataUserInfo" variant="outlined" class="mt-5">修改</v-btn>
         </v-col>
       </v-row>
     </v-card>
   </div>
 </template>
 
-<script>
-import AvatarCropper from "vue-avatar-cropper";
-export default {
-  components: { AvatarCropper },
-  data: function() {
-    return {
-      userInfo: {
-        nickname: this.$store.state.nickname,
-        intro: this.$store.state.intro,
-        webSite: this.$store.state.webSite,
-        loginType: this.$store.state.loginType
-      }
-    };
-  },
-  methods: {
-    updataUserInfo() {
-      this.axios.put("/api/users/info", this.userInfo).then(({ data }) => {
-        if (data.flag) {
-          this.$store.commit("updateUserInfo", this.userInfo);
-          this.$toast({ type: "success", message: "修改成功" });
-        } else {
-          this.$toast({ type: "error", message: data.message });
-        }
-      });
-    },
-    uploadAvatar(data) {
-      if (data.flag) {
-        this.$store.commit("updateAvatar", data.data);
-        this.$toast({ type: "success", message: "上传成功" });
-      } else {
-        this.$toast({ type: "error", message: data.message });
-      }
-    },
-    openEmailModel() {
-      this.$store.state.emailFlag = true;
+<script setup>
+import { ref, computed } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
+
+const store = useBlogStore();
+const toast = useToast();
+
+const fileInput = ref(null);
+
+const userInfo = ref({
+  nickname: store.nickname,
+  intro: store.intro,
+  webSite: store.webSite,
+  loginType: store.loginType
+});
+
+function updataUserInfo() {
+  axios.put("/api/users/info", userInfo.value).then(({ data }) => {
+    if (data.flag) {
+      store.updateUserInfo(userInfo.value);
+      toast({ type: "success", message: "修改成功" });
+    } else {
+      toast({ type: "error", message: data.message });
     }
-  },
-  computed: {
-    email() {
-      return this.$store.state.email;
-    },
-    loginType() {
-      return this.$store.state.loginType;
-    },
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "user") {
-          cover = item.pageCover;
-        }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    }
+  });
+}
+
+function triggerFileInput() {
+  if (fileInput.value) {
+    fileInput.value.click();
   }
-};
+}
+
+function uploadAvatar(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append("file", file);
+  axios
+    .post("/api/users/avatar", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    })
+    .then(({ data }) => {
+      if (data.flag) {
+        store.updateAvatar(data.data);
+        toast({ type: "success", message: "上传成功" });
+      } else {
+        toast({ type: "error", message: data.message });
+      }
+    });
+}
+
+function openEmailModel() {
+  store.emailFlag = true;
+}
+
+const email = computed(() => {
+  return store.email;
+});
+
+const loginType = computed(() => {
+  return store.loginType;
+});
+
+const cover = computed(() => {
+  var c = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "user") {
+      c = item.pageCover;
+    }
+  });
+  return "background: url(" + c + ") center center / cover no-repeat";
+});
 </script>
 
 <style scoped>

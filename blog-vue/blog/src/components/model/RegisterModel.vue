@@ -56,125 +56,120 @@
   </v-dialog>
 </template>
 
-<script>
-export default {
-  data: function() {
-    return {
-      username: "",
-      code: "",
-      password: "",
-      flag: true,
-      codeMsg: "发送",
-      time: 60,
-      show: false
-    };
+<script setup>
+import { ref, computed, watch } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
+import config from "@/assets/js/config";
+
+const store = useBlogStore();
+const { toast } = useToast();
+
+const username = ref("");
+const code = ref("");
+const password = ref("");
+const flag = ref(true);
+const codeMsg = ref("发送");
+const time = ref(60);
+const show = ref(false);
+let timer = null;
+
+const registerFlag = computed({
+  get() {
+    return store.registerFlag;
   },
-  methods: {
-    openLogin() {
-      this.$store.state.registerFlag = false;
-      this.$store.state.loginFlag = true;
-    },
-    sendCode() {
-      const that = this;
-      // eslint-disable-next-line no-undef
-      var captcha = new TencentCaptcha(this.config.TENCENT_CAPTCHA, function(
-        res
-      ) {
-        if (res.ret === 0) {
-          //发送邮件
-          that.countDown();
-          that.axios
-            .get("/api/users/code", {
-              params: { username: that.username }
-            })
-            .then(({ data }) => {
-              if (data.flag) {
-                that.$toast({ type: "success", message: "发送成功" });
-              } else {
-                that.$toast({ type: "error", message: data.message });
-              }
-            });
-        }
-      });
-      // 显示验证码
-      captcha.show();
-    },
-    countDown() {
-      this.flag = true;
-      this.timer = setInterval(() => {
-        this.time--;
-        this.codeMsg = this.time + "s";
-        if (this.time <= 0) {
-          clearInterval(this.timer);
-          this.codeMsg = "发送";
-          this.time = 60;
-          this.flag = false;
-        }
-      }, 1000);
-    },
-    register() {
-      var reg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-      if (!reg.test(this.username)) {
-        this.$toast({ type: "error", message: "邮箱格式不正确" });
-        return false;
-      }
-      if (this.code.trim().length != 6) {
-        this.$toast({ type: "error", message: "请输入6位验证码" });
-        return false;
-      }
-      if (this.password.trim().length < 6) {
-        this.$toast({ type: "error", message: "密码不能少于6位" });
-        return false;
-      }
-      const user = {
-        username: this.username,
-        password: this.password,
-        code: this.code
-      };
-      this.axios.post("/api/register", user).then(({ data }) => {
-        if (data.flag) {
-          let param = new URLSearchParams();
-          param.append("username", user.username);
-          param.append("password", user.password);
-          this.axios.post("/api/login", param).then(({ data }) => {
-            this.username = "";
-            this.password = "";
-            this.$store.commit("login", data.data);
-            this.$store.commit("closeModel");
-          });
-          this.$toast({ type: "success", message: "登录成功" });
-        } else {
-          this.$toast({ type: "error", message: data.message });
-        }
-      });
-    }
+  set(value) {
+    store.registerFlag = value;
   },
-  computed: {
-    registerFlag: {
-      set(value) {
-        this.$store.state.registerFlag = value;
-      },
-      get() {
-        return this.$store.state.registerFlag;
-      }
-    },
-    isMobile() {
-      const clientWidth = document.documentElement.clientWidth;
-      if (clientWidth > 960) {
-        return false;
-      }
-      return true;
+});
+
+const isMobile = computed(() => {
+  const clientWidth = document.documentElement.clientWidth;
+  return clientWidth <= 960;
+});
+
+watch(username, (value) => {
+  var reg = /^[A-Za-z0-9一-龥]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+  flag.value = !reg.test(value);
+});
+
+function openLogin() {
+  store.registerFlag = false;
+  store.loginFlag = true;
+}
+
+function sendCode() {
+  // eslint-disable-next-line no-undef
+  var captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, function (res) {
+    if (res.ret === 0) {
+      //发送邮件
+      countDown();
+      axios
+        .get("/api/users/code", {
+          params: { username: username.value },
+        })
+        .then(({ data }) => {
+          if (data.flag) {
+            toast({ type: "success", message: "发送成功" });
+          } else {
+            toast({ type: "error", message: data.message });
+          }
+        });
     }
-  },
-  watch: {
-    username(value) {
-      var reg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-      if (reg.test(value)) {
-        this.flag = false;
-      } else {
-        this.flag = true;
-      }
+  });
+  // 显示验证码
+  captcha.show();
+}
+
+function countDown() {
+  flag.value = true;
+  timer = setInterval(() => {
+    time.value--;
+    codeMsg.value = time.value + "s";
+    if (time.value <= 0) {
+      clearInterval(timer);
+      codeMsg.value = "发送";
+      time.value = 60;
+      flag.value = false;
     }
+  }, 1000);
+}
+
+function register() {
+  var reg = /^[A-Za-z0-9一-龥]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+  if (!reg.test(username.value)) {
+    toast({ type: "error", message: "邮箱格式不正确" });
+    return false;
   }
-};
+  if (code.value.trim().length != 6) {
+    toast({ type: "error", message: "请输入6位验证码" });
+    return false;
+  }
+  if (password.value.trim().length < 6) {
+    toast({ type: "error", message: "密码不能少于6位" });
+    return false;
+  }
+  const user = {
+    username: username.value,
+    password: password.value,
+    code: code.value,
+  };
+  axios.post("/api/register", user).then(({ data }) => {
+    if (data.flag) {
+      let param = new URLSearchParams();
+      param.append("username", user.username);
+      param.append("password", user.password);
+      axios.post("/api/login", param).then(({ data }) => {
+        username.value = "";
+        password.value = "";
+        store.login(data.data);
+        store.closeModel();
+      });
+      toast({ type: "success", message: "登录成功" });
+    } else {
+      toast({ type: "error", message: data.message });
+    }
+  });
+}
 </script>

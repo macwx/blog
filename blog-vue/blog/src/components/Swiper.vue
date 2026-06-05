@@ -35,42 +35,46 @@
   </router-link>
 </template>
 
-<script>
-export default {
-  props: {
-    height: {
-      default: 25,
-      type: Number
-    },
-    lineNum: {
-      default: 1,
-      type: Number
-    },
-    list: {
-      type: Array
-    }
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from "vue";
+
+const props = defineProps({
+  height: {
+    default: 25,
+    type: Number
   },
-  data: function() {
-    return {
-      num: 0
-    };
+  lineNum: {
+    default: 1,
+    type: Number
   },
-  computed: {
-    transform: function() {
-      return "translateY(-" + this.num * this.height + "px)";
-    }
-  },
-  created: function() {
-    let _this = this;
-    setInterval(function() {
-      if (_this.num !== _this.list.length) {
-        _this.num++;
-      } else {
-        _this.num = 0;
-      }
-    }, 3000);
+  list: {
+    type: Array,
+    default: () => []
   }
-};
+});
+
+const num = ref(0);
+let timer = null;
+
+const transform = computed(() => {
+  return "translateY(-" + num.value * props.height + "px)";
+});
+
+onMounted(() => {
+  timer = setInterval(function() {
+    if (num.value !== props.list.length) {
+      num.value++;
+    } else {
+      num.value = 0;
+    }
+  }, 3000);
+});
+
+onUnmounted(() => {
+  if (timer) {
+    clearInterval(timer);
+  }
+});
 </script>
 
 <style>

@@ -22,7 +22,7 @@
               </div>
               <!-- 发表时间 -->
               <div class="time">
-                {{ item.createTime | time }}
+                {{ formatTime(item.createTime) }}
                 <span class="top" v-if="item.isTop == 1">
                   <i class="iconfont iconzhiding" /> 置顶
                 </span>
@@ -51,7 +51,7 @@
                 <div class="talk-operation-item">
                   <v-icon
                     size="16"
-                    :color="isLike(item.id)"
+                    :color="getLikeColor(item.id)"
                     class="like-btn"
                     @click.prevent="like(item)"
                   >
@@ -85,88 +85,87 @@
   </div>
 </template>
 
-<script>
-export default {
-  created() {
-    this.listTalks();
-  },
-  data: function() {
-    return {
-      current: 1,
-      size: 10,
-      talkList: [],
-      count: 0,
-      previewList: []
-    };
-  },
-  methods: {
-    listTalks() {
-      this.axios
-        .get("/api/talks", {
-          params: {
-            current: this.current,
-            size: this.size
-          }
-        })
-        .then(({ data }) => {
-          if (this.current == 1) {
-            this.talkList = data.data.recordList;
-          } else {
-            this.talkList.push(...data.data.recordList);
-          }
-          this.talkList.forEach(item => {
-            if (item.imgList) {
-              this.previewList.push(...item.imgList);
-            }
-          });
-          this.current++;
-          this.count = data.data.count;
-        });
-    },
-    previewImg(img) {
-      this.$imagePreview({
-        images: this.previewList,
-        index: this.previewList.indexOf(img)
-      });
-    },
-    like(talk) {
-      // 判断登录
-      if (!this.$store.state.userId) {
-        this.$store.state.loginFlag = true;
-        return false;
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+
+const store = useBlogStore();
+
+const current = ref(1);
+const size = ref(10);
+const talkList = ref([]);
+const count = ref(0);
+const previewList = ref([]);
+
+function formatTime(time) {
+  // TODO: Vue3 migration - replaced | time filter
+  return time;
+}
+
+function getLikeColor(talkId) {
+  return store.talkLikeSet.indexOf(talkId) != -1 ? "#eb5055" : "#999";
+}
+
+function listTalks() {
+  axios
+    .get("/api/talks", {
+      params: {
+        current: current.value,
+        size: size.value
       }
-      // 发送请求
-      this.axios.post("/api/talks/" + talk.id + "/like").then(({ data }) => {
-        if (data.flag) {
-          // 判断是否点赞
-          if (this.$store.state.talkLikeSet.indexOf(talk.id) != -1) {
-            this.$set(talk, "likeCount", talk.likeCount - 1);
-          } else {
-            this.$set(talk, "likeCount", talk.likeCount + 1);
-          }
-          this.$store.commit("talkLike", talk.id);
+    })
+    .then(({ data }) => {
+      if (current.value == 1) {
+        talkList.value = data.data.recordList;
+      } else {
+        talkList.value.push(...data.data.recordList);
+      }
+      talkList.value.forEach(item => {
+        if (item.imgList) {
+          previewList.value.push(...item.imgList);
         }
       });
-    }
-  },
-  computed: {
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "talk") {
-          cover = item.pageCover;
-        }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    },
-    isLike() {
-      return function(talkId) {
-        var talkLikeSet = this.$store.state.talkLikeSet;
-        return talkLikeSet.indexOf(talkId) != -1 ? "#eb5055" : "#999";
-      };
-    }
+      current.value++;
+      count.value = data.data.count;
+    });
+}
+
+function previewImg(img) {
+  // TODO: Vue3 migration - $imagePreview removed, use basic preview
+  window.open(img, "_blank");
+}
+
+function like(talk) {
+  if (!store.userId) {
+    store.loginFlag = true;
+    return false;
   }
-};
+  axios.post("/api/talks/" + talk.id + "/like").then(({ data }) => {
+    if (data.flag) {
+      if (store.talkLikeSet.indexOf(talk.id) != -1) {
+        talk.likeCount = talk.likeCount - 1;
+      } else {
+        talk.likeCount = talk.likeCount + 1;
+      }
+      store.talkLike(talk.id);
+    }
+  });
+}
+
+const cover = computed(() => {
+  var c = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "talk") {
+      c = item.pageCover;
+    }
+  });
+  return "background: url(" + c + ") center center / cover no-repeat";
+});
+
+onMounted(() => {
+  listTalks();
+});
 </script>
 
 <style scoped>

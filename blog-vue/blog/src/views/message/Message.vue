@@ -21,87 +21,90 @@
           </button>
         </div>
       </div>
-      <!-- 弹幕列表 -->
+      <!-- TODO: Vue3 migration - vue-baberrage removed -->
       <div class="barrage-container">
-        <vue-baberrage :barrageList="barrageList">
-          <template v-slot:default="slotProps">
-            <span class="barrage-items">
-              <img
-                :src="slotProps.item.avatar"
-                width="30"
-                height="30"
-                style="border-radius:50%"
-              />
-              <span class="ml-2">{{ slotProps.item.nickname }} :</span>
-              <span class="ml-2">{{ slotProps.item.messageContent }}</span>
-            </span>
-          </template>
-        </vue-baberrage>
+        <div
+          v-for="(item, index) in barrageList"
+          :key="index"
+          class="barrage-items"
+          style="margin: 8px auto; max-width: 400px"
+        >
+          <img
+            :src="item.avatar"
+            width="30"
+            height="30"
+            style="border-radius:50%"
+          />
+          <span class="ml-2">{{ item.nickname }} :</span>
+          <span class="ml-2">{{ item.messageContent }}</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  mounted() {
-    this.listMessage();
-  },
-  data() {
-    return {
-      show: false,
-      messageContent: "",
-      barrageList: []
-    };
-  },
-  methods: {
-    addToList() {
-      if (this.messageContent.trim() == "") {
-        this.$toast({ type: "error", message: "留言不能为空" });
-        return false;
-      }
-      const userAvatar = this.$store.state.avatar
-        ? this.$store.state.avatar
-        : this.$store.state.blogInfo.websiteConfig.touristAvatar;
-      const userNickname = this.$store.state.nickname
-        ? this.$store.state.nickname
-        : "游客";
-      var message = {
-        avatar: userAvatar,
-        nickname: userNickname,
-        messageContent: this.messageContent,
-        time: Math.floor(Math.random() * (10 - 7)) + 7
-      };
-      this.messageContent = "";
-      this.axios.post("/api/messages", message).then(({ data }) => {
-        if (data.flag) {
-          this.barrageList.push(message);
-          this.$toast({ type: "success", message: "留言成功" });
-        } else {
-          this.$toast({ type: "error", message: data.message });
-        }
-      });
-    },
-    listMessage() {
-      this.axios.get("/api/messages").then(({ data }) => {
-        if (data.flag) {
-          this.barrageList = data.data;
-        }
-      });
-    }
-  },
-  computed: {
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "message") {
-          cover = item.pageCover;
-        }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    }
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
+
+const store = useBlogStore();
+const toast = useToast();
+
+const show = ref(false);
+const messageContent = ref("");
+const barrageList = ref([]);
+
+function addToList() {
+  if (messageContent.value.trim() == "") {
+    toast({ type: "error", message: "留言不能为空" });
+    return false;
   }
-};
+  const userAvatar = store.avatar
+    ? store.avatar
+    : store.blogInfo.websiteConfig.touristAvatar;
+  const userNickname = store.nickname
+    ? store.nickname
+    : "游客";
+  var message = {
+    avatar: userAvatar,
+    nickname: userNickname,
+    messageContent: messageContent.value,
+    time: Math.floor(Math.random() * (10 - 7)) + 7
+  };
+  messageContent.value = "";
+  axios.post("/api/messages", message).then(({ data }) => {
+    if (data.flag) {
+      barrageList.value.push(message);
+      toast({ type: "success", message: "留言成功" });
+    } else {
+      toast({ type: "error", message: data.message });
+    }
+  });
+}
+
+function listMessage() {
+  axios.get("/api/messages").then(({ data }) => {
+    if (data.flag) {
+      barrageList.value = data.data;
+    }
+  });
+}
+
+const cover = computed(() => {
+  var c = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "message") {
+      c = item.pageCover;
+    }
+  });
+  return "background: url(" + c + ") center center / cover no-repeat";
+});
+
+onMounted(() => {
+  listMessage();
+});
 </script>
 
 <style scoped>

@@ -5,7 +5,7 @@
       <div class="banner-container">
         <!-- 联系方式 -->
         <h1 class="blog-title animated zoomIn">
-          {{ blogInfo.websiteConfig.websiteName }}
+          {{ store.blogInfo.websiteConfig.websiteName }}
         </h1>
         <!-- 一言 -->
         <div class="blog-intro">
@@ -19,20 +19,20 @@
               target="_blank"
               :href="
               'http://wpa.qq.com/msgrd?v=3&uin=' +
-                blogInfo.websiteConfig.qq +
+                store.blogInfo.websiteConfig.qq +
                 '&site=qq&menu=yes'
             "
           />
           <a
               v-if="isShowSocial('github')"
               target="_blank"
-              :href="blogInfo.websiteConfig.github"
+              :href="store.blogInfo.websiteConfig.github"
               class="mr-5 iconfont icongithub"
           />
           <a
               v-if="isShowSocial('gitee')"
               target="_blank"
-              :href="blogInfo.websiteConfig.gitee"
+              :href="store.blogInfo.websiteConfig.gitee"
               class="iconfont icongitee-fill-round"
           />
         </div>
@@ -45,10 +45,10 @@
       </div>
     </div>
     <!-- 主页文章 -->
-    <v-row class="home-container">
+    <v-row class="home-container" align="start">
       <v-col md="9" cols="12">
         <!-- 说说轮播 -->
-        <v-card class="animated zoomIn" v-if="talkList.length > 0">
+        <v-card class="animated zoomIn mt-5" v-if="talkList.length > 0">
           <Swiper :list="talkList"/>
         </v-card>
         <!-- 虾聊社区介绍 -->
@@ -92,6 +92,7 @@
                   class="on-hover"
                   width="100%"
                   height="100%"
+                  cover
                   :src="item.articleCover"
               />
             </router-link>
@@ -113,7 +114,7 @@
               </span>
               <!-- 发表时间 -->
               <v-icon size="14">mdi-calendar-month-outline</v-icon>
-              {{ item.createTime | date }}
+              {{ $filters.date(item.createTime) }}
               <span class="separator">|</span>
               <!-- 文章分类 -->
               <router-link :to="'/categories/' + item.categoryId">
@@ -139,10 +140,13 @@
             </div>
           </div>
         </v-card>
-        <!-- 无限加载 -->
-        <infinite-loading @infinite="infiniteHandler">
-          <div slot="no-more"/>
-        </infinite-loading>
+        <!-- TODO: Vue3 migration - removed vue-infinite-loading dependency -->
+        <!-- Load more button replacing infinite-loading -->
+        <div v-if="hasMore" class="text-center mt-4">
+          <v-btn color="#49b1f5" variant="outlined" @click="loadMore" :loading="loading">
+            加载更多
+          </v-btn>
+        </div>
       </v-col>
       <!-- 博主信息 -->
       <v-col md="3" cols="12" class="d-md-block d-none">
@@ -153,14 +157,14 @@
               <v-avatar size="110">
                 <img
                     class="author-avatar"
-                    :src="blogInfo.websiteConfig.websiteAvatar"
+                    :src="store.blogInfo.websiteConfig.websiteAvatar"
                 />
               </v-avatar>
               <div style="font-size: 1.375rem;margin-top:0.625rem">
-                {{ blogInfo.websiteConfig.websiteAuthor }}
+                {{ store.blogInfo.websiteConfig.websiteAuthor }}
               </div>
               <div style="font-size: 0.875rem;">
-                {{ blogInfo.websiteConfig.websiteIntro }}
+                {{ store.blogInfo.websiteConfig.websiteIntro }}
               </div>
             </div>
             <!-- 博客信息 -->
@@ -169,7 +173,7 @@
                 <router-link to="/archives">
                   <div style="font-size: 0.875rem">文章</div>
                   <div style="font-size: 1.25rem">
-                    {{ blogInfo.articleCount }}
+                    {{ store.blogInfo.articleCount }}
                   </div>
                 </router-link>
               </div>
@@ -177,14 +181,14 @@
                 <router-link to="/categories">
                   <div style="font-size: 0.875rem">分类</div>
                   <div style="font-size: 1.25rem">
-                    {{ blogInfo.categoryCount }}
+                    {{ store.blogInfo.categoryCount }}
                   </div>
                 </router-link>
               </div>
               <div class="blog-info-data">
                 <router-link to="/tags">
                   <div style="font-size: 0.875rem">标签</div>
-                  <div style="font-size: 1.25rem">{{ blogInfo.tagCount }}</div>
+                  <div style="font-size: 1.25rem">{{ store.blogInfo.tagCount }}</div>
                 </router-link>
               </div>
             </div>
@@ -201,20 +205,20 @@
             <!--                target="_blank"-->
             <!--                :href="-->
             <!--                  'http://wpa.qq.com/msgrd?v=3&uin=' +-->
-            <!--                    blogInfo.websiteConfig.qq +-->
+            <!--                    store.blogInfo.websiteConfig.qq +-->
             <!--                    '&site=qq&menu=yes'-->
             <!--                "-->
             <!--              />-->
             <!--              <a-->
             <!--                v-if="isShowSocial('github')"-->
             <!--                target="_blank"-->
-            <!--                :href="blogInfo.websiteConfig.github"-->
+            <!--                :href="store.blogInfo.websiteConfig.github"-->
             <!--                class="mr-5 iconfont icongithub"-->
             <!--              />-->
             <!--              <a-->
             <!--                v-if="isShowSocial('gitee')"-->
             <!--                target="_blank"-->
-            <!--                :href="blogInfo.websiteConfig.gitee"-->
+            <!--                :href="store.blogInfo.websiteConfig.gitee"-->
             <!--                class="iconfont icongitee-fill-round"-->
             <!--              />-->
             <!--            </div>-->
@@ -227,7 +231,7 @@
               公告
             </div>
             <div style="font-size:0.875rem">
-              {{ blogInfo.websiteConfig.websiteNotice }}
+              {{ store.blogInfo.websiteConfig.websiteNotice }}
             </div>
           </v-card>
           <!-- 虾聊动态 -->
@@ -260,32 +264,32 @@
               <v-icon size="18">mdi-account</v-icon>
               源码地址
             </div>
-            <div class="guanzhu" id="follow-us" ref="follow">
+            <div class="guanzhu" id="follow-us" ref="followRef">
               <ul>
                 <li v-if="isShowSocial('gitee')" class="gitee">
-                  <a :href="blogInfo.websiteConfig.gitee" target="_blank">{{
-                      blogInfo.websiteConfig.gitee
+                  <a :href="store.blogInfo.websiteConfig.gitee" target="_blank">{{
+                      store.blogInfo.websiteConfig.gitee
                     }}</a>
                 </li>
 
                 <li v-if="isShowSocial('email')" class="email">
                   <a href="javascript:void(0);">{{
-                      blogInfo.websiteConfig.email
+                      store.blogInfo.websiteConfig.email
                     }}</a>
                 </li>
                 <li v-if="isShowSocial('github')" class="github">
-                  <a :href="blogInfo.websiteConfig.github" target="_blank">{{
-                      blogInfo.websiteConfig.github
+                  <a :href="store.blogInfo.websiteConfig.github" target="_blank">{{
+                      store.blogInfo.websiteConfig.github
                     }}</a>
                 </li>
                 <li v-if="isShowSocial('qq')" class="qq">
                   <a
                       :href="
                       'tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=' +
-                        blogInfo.websiteConfig.qq
+                        store.blogInfo.websiteConfig.qq
                     "
                       target="_blank"
-                  >{{ blogInfo.websiteConfig.qq }}</a
+                  >{{ store.blogInfo.websiteConfig.qq }}</a
                   >
                 </li>
               </ul>
@@ -306,14 +310,14 @@
             </div>
             <div class="web-info">
               <div style="padding:4px 0 0">
-                网站作者:<span class="float-right">{{ blogInfo.websiteConfig.websiteAuthor }}</span>
+                网站作者:<span class="float-right">{{ store.blogInfo.websiteConfig.websiteAuthor }}</span>
               </div>
               <div style="padding:4px 0 0">
                 运行时间:<span class="float-right">{{ time }}</span>
               </div>
               <div style="padding:4px 0 0">
                 总访问量:<span class="float-right">
-                  {{ blogInfo.viewsCount }}
+                  {{ store.blogInfo.viewsCount }}
                 </span>
               </div>
             </div>
@@ -327,241 +331,201 @@
       </v-col>
     </v-row>
     <!-- 提示消息 -->
-    <v-snackbar v-model="tip" top color="#49b1f5" :timeout="2000">
+    <v-snackbar v-model="tip" location="top" color="#49b1f5" :timeout="2000">
       按CTRL+D 键将本页加入书签
     </v-snackbar>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
 import Swiper from "../../components/Swiper.vue";
 import EasyTyper from "easy-typer-js";
 import MarkdownIt from "markdown-it";
 
 const md = new MarkdownIt();
+const store = useBlogStore();
 
-export default {
-  components: {
-    Swiper
-  },
-  created() {
-    this.init();
-    this.listHomeTalks();
-    this.fetchClawdchatPosts();
-    this.timer = setInterval(this.runTime, 1000);
-    // this.initMoyuPic();
-  },
-  data: function () {
-    return {
-      tip: false,
-      time: "",
-      obj: {
-        output: "",
-        isEnd: false,
-        speed: 300,
-        singleBack: false,
-        sleep: 0,
-        type: "rollback",
-        backSpeed: 40,
-        sentencePause: true
-      },
-      articleList: [],
-      moyuPic: "../../../public/img/wanma.png",
-      talkList: [],
-      clawdchatPosts: [],
-      clawdchatPostCount: "-",
-      clawdchatKarma: "-",
-      current: 1
-    };
-  },
+// Refs
+const followRef = ref(null);
+const tip = ref(false);
+const time = ref("");
+const obj = ref({
+  output: "",
+  isEnd: false,
+  speed: 300,
+  singleBack: false,
+  sleep: 0,
+  type: "rollback",
+  backSpeed: 40,
+  sentencePause: true
+});
+const articleList = ref([]);
+const moyuPic = ref("../../../public/img/wanma.png");
+const talkList = ref([]);
+const clawdchatPosts = ref([]);
+const clawdchatPostCount = ref("-");
+const clawdchatKarma = ref("-");
+const current = ref(1);
+const hasMore = ref(true);
+const loading = ref(false);
 
-  methods: {
-    // 初始化
-    async init() {
-      // 假设blogInfo已经在data中定义
-      if (this.blogInfo && this.blogInfo.websiteConfig) {
-        document.title = this.blogInfo.websiteConfig.websiteName;
-      }
-      // 使用async/await进行异步请求
-      this.axios.get("/api/talks/first").then(({data}) => {
-        this.initTyped(data.data);
-      });
+// Timer reference for cleanup
+let timer = null;
 
-      // // 一言Api进行打字机循环输出效果
-      // fetch("https://v1.hitokoto.cn?c=i")
-      //   .then(res => {
-      //     return res.json();
-      //   })
-      //   .then(({hitokoto}) => {
-      //     this.initTyped(hitokoto);
-      //   });
-    },
-    fetchClawdchatPosts() {
-      this.axios
-        .get(
-          "/clawdchat-api/api/v1/agents/98b5c397-c5bc-423a-9049-6663409d0467/posts?limit=3&skip=0"
-        )
-        .then(({ data }) => {
-          if (data && data.posts) {
-            this.clawdchatPosts = data.posts;
-            this.clawdchatPostCount = data.total || 0;
-            if (data.posts.length > 0 && data.posts[0].author) {
-              this.clawdchatKarma = data.posts[0].author.karma || 0;
-            }
-          }
-        })
-        .catch(() => {});
-    },
-    listHomeTalks() {
-      this.axios.get("/api/home/talks").then(({data}) => {
-        this.talkList = data.data;
-      });
-    },
-    initTyped(input, fn, hooks) {
-      const obj = this.obj;
-      // eslint-disable-next-line no-unused-vars
-      const typed = new EasyTyper(obj, input, fn, hooks);
-    },
-    scrollDown() {
-      window.scrollTo({
-        behavior: "smooth",
-        top: document.documentElement.clientHeight
-      });
-    },
-    runTime() {
-      var timeold =
-          new Date().getTime() -
-          new Date(this.blogInfo.websiteConfig.websiteCreateTime).getTime();
-      var msPerDay = 24 * 60 * 60 * 1000;
-      var daysold = Math.floor(timeold / msPerDay);
-      var str = "";
-      var day = new Date();
-      str += daysold + "天";
-      str += day.getHours() + "时";
-      str += day.getMinutes() + "分";
-      str += day.getSeconds() + "秒";
-      this.time = str;
-    },
-    // async initMoyuPic() {
-    //   await this.axios
-    //       .get("https://api.vvhan.com/api/moyu", {
-    //         params: {
-    //         type: "json"
-    //         }
-    //       })
-    //       .then(({data}) => {
-    //         this.moyuPic = data.url;
-    //       });
-    // },
-    preview() {
-      let pic_images = [this.moyuPic];
-      this.$imagePreview({
-        showIndex: true,
-        loop: false,
-        images: pic_images,
-        index: 0
-      });
-    },
-    infiniteHandler($state) {
-      this.axios
-          .get("/api/articles", {
-            params: {
-              current: this.current
-            }
-          })
-          .then(({data}) => {
-            if (data.data.length) {
-              // 去除markdown标签
-              data.data.forEach(item => {
-                item.articleContent = md
-                    .render(item.articleContent)
-                    .replace(/<\/?[^>]*>/g, "")
-                    .replace(/[|]*\n/, "")
-                    .replace(/&npsp;/gi, "");
-              });
-              this.articleList.push(...data.data);
-              this.current++;
-              $state.loaded();
-            } else {
-              $state.complete();
-            }
-          });
+// Computed
+const blogInfo = computed(() => store.blogInfo);
+
+const cover = computed(() => {
+  var coverUrl = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "home") {
+      coverUrl = item.pageCover;
     }
+  });
+  return "background: url(" + coverUrl + ") center center / cover no-repeat";
+});
 
-  },
-  metaInfo: {
-    meta: [{
-      name: "keyWords",
-      content: "超伟博客,开源博客,www.macw.cc"  //变量或字符串
-    }, {
-      name: "description",
-      content: "一个专注于技术分享的博客平台,大家以共同学习,乐于分享,拥抱开源的价值观进行学习交流"
-    }]
-  },
-  mounted: async function () {
-    // 设置配置信息
-    window.WIDGET = {
-      CONFIG: {
-        layout: "2",
-        width: 230,
-        height: 300,
-        background: "2",
-        dataColor: "000000",
-        borderRadius: "5",
-        city: "CN101180101",
-        key: "4034255d0cc94897b5f745367ccb81f2"
-      }
-    };
-
-    // 异步加载脚本
-    let script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "https://widget.qweather.net/standard/static/js/he-standard-common.js?v=2.0";
-    script.async = true; // 设置async属性
-
-    // 监听加载完成事件
-    script.onload = function () {
-      // 脚本加载完成后执行的代码，如果有需要的话
-      console.log('QWeather script loaded');
-    };
-
-    // 错误处理
-    script.onerror = function (error) {
-      console.error('QWeather script loading failed:', error);
-    };
-
-    // 将脚本添加到head中
-    document.getElementsByTagName("head")[0].appendChild(script);
-  },
-  computed: {
-    isRight() {
-      return function (index) {
-        if (index % 2 == 0) {
-          return "article-cover left-radius";
-        }
-        return "article-cover right-radius";
-      };
-    },
-    blogInfo() {
-      return this.$store.state.blogInfo;
-    },
-    isShowSocial() {
-      return function (social) {
-        var list = this.blogInfo.websiteConfig.socialUrlList;
-        return list && list.indexOf(social) != -1;
-      };
-    },
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "home") {
-          cover = item.pageCover;
-        }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    }
+// Methods
+function isRight(index) {
+  if (index % 2 == 0) {
+    return "article-cover left-radius";
   }
-};
+  return "article-cover right-radius";
+}
+
+function isShowSocial(social) {
+  var list = store.blogInfo.websiteConfig.socialUrlList;
+  return list && list.indexOf(social) != -1;
+}
+
+async function init() {
+  if (store.blogInfo && store.blogInfo.websiteConfig) {
+    document.title = store.blogInfo.websiteConfig.websiteName;
+  }
+  axios.get("/api/talks/first").then(({ data }) => {
+    initTyped(data.data);
+  });
+}
+
+function fetchClawdchatPosts() {
+  axios
+    .get(
+      "/clawdchat-api/api/v1/agents/98b5c397-c5bc-423a-9049-6663409d0467/posts?limit=3&skip=0"
+    )
+    .then(({ data }) => {
+      if (data && data.posts) {
+        clawdchatPosts.value = data.posts;
+        clawdchatPostCount.value = data.total || 0;
+        if (data.posts.length > 0 && data.posts[0].author) {
+          clawdchatKarma.value = data.posts[0].author.karma || 0;
+        }
+      }
+    })
+    .catch(() => {});
+}
+
+function listHomeTalks() {
+  axios.get("/api/home/talks").then(({ data }) => {
+    talkList.value = data.data;
+  });
+}
+
+function initTyped(input, fn, hooks) {
+  const o = obj.value;
+  // eslint-disable-next-line no-unused-vars
+  const typed = new EasyTyper(o, input, fn, hooks);
+}
+
+function scrollDown() {
+  window.scrollTo({
+    behavior: "smooth",
+    top: document.documentElement.clientHeight
+  });
+}
+
+function runTime() {
+  var timeold =
+      new Date().getTime() -
+      new Date(store.blogInfo.websiteConfig.websiteCreateTime).getTime();
+  var msPerDay = 24 * 60 * 60 * 1000;
+  var daysold = Math.floor(timeold / msPerDay);
+  var str = "";
+  var day = new Date();
+  str += daysold + "天";
+  str += day.getHours() + "时";
+  str += day.getMinutes() + "分";
+  str += day.getSeconds() + "秒";
+  time.value = str;
+}
+
+// TODO: Vue3 migration - removed vue-image-swipe dependency
+// function preview() {
+//   let pic_images = [moyuPic.value];
+//   // vue-image-swipe removed, needs alternative implementation
+// }
+
+function loadMore() {
+  loading.value = true;
+  axios
+      .get("/api/articles", {
+        params: {
+          current: current.value
+        }
+      })
+      .then(({ data }) => {
+        if (data.data.length) {
+          data.data.forEach(item => {
+            item.articleContent = md
+                .render(item.articleContent)
+                .replace(/<\/?[^>]*>/g, "")
+                .replace(/[|]*\n/, "")
+                .replace(/&npsp;/gi, "");
+          });
+          articleList.value.push(...data.data);
+          current.value++;
+          loading.value = false;
+        } else {
+          hasMore.value = false;
+          loading.value = false;
+        }
+      });
+}
+
+// SEO meta
+function setMetaInfo() {
+  // Set meta tags
+  const keywordsMeta = document.querySelector('meta[name="keyWords"]');
+  if (keywordsMeta) {
+    keywordsMeta.setAttribute("content", "超伟博客,开源博客,www.macw.cc");
+  }
+  const descMeta = document.querySelector('meta[name="description"]');
+  if (descMeta) {
+    descMeta.setAttribute("content", "一个专注于技术分享的博客平台,大家以共同学习,乐于分享,拥抱开源的价值观进行学习交流");
+  }
+}
+
+// Lifecycle
+init();
+listHomeTalks();
+fetchClawdchatPosts();
+timer = setInterval(runTime, 1000);
+setMetaInfo();
+
+// Initial load
+loadMore();
+
+onMounted(() => {
+  // QWeather widget is commented out, script loading removed
+});
+
+onUnmounted(() => {
+  if (timer) {
+    clearInterval(timer);
+  }
+});
 </script>
 
 <style lang="stylus">
@@ -613,13 +577,13 @@ export default {
 .clawdchat-mini-more:hover {
   color: #ff7242;
 }
-.theme--dark .clawdchat-mini-title {
+.v-theme--dark .clawdchat-mini-title {
   color: rgba(255, 255, 255, 0.7);
 }
-.theme--dark .clawdchat-mini-post {
+.v-theme--dark .clawdchat-mini-post {
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
-.theme--dark .clawdchat-mini-more {
+.v-theme--dark .clawdchat-mini-more {
   border-top-color: rgba(255, 255, 255, 0.08);
 }
 </style>
@@ -698,13 +662,13 @@ export default {
   color: #49b1f5;
   transition: color 0.3s;
 }
-.theme--dark .clawdchat-feature-title {
+.v-theme--dark .clawdchat-feature-title {
   color: rgba(255, 255, 255, 0.87);
 }
-.theme--dark .clawdchat-feature-desc {
+.v-theme--dark .clawdchat-feature-desc {
   color: rgba(255, 255, 255, 0.6);
 }
-.theme--dark .clawdchat-feature-stats strong {
+.v-theme--dark .clawdchat-feature-stats strong {
   color: rgba(255, 255, 255, 0.87);
 }
 </style>
@@ -771,7 +735,7 @@ export default {
 
   .home-container {
     max-width: 1200px;
-    margin: calc(100vh - 48px) auto 28px auto;
+    margin: calc(100vh - 120px) auto 28px auto;
     padding: 0 5px;
   }
 
@@ -785,8 +749,12 @@ export default {
 
   .article-cover {
     overflow: hidden;
-    height: 100%;
+    height: 280px;
     width: 45%;
+  }
+
+  .article-cover :deep(.v-img__img) {
+    object-fit: cover !important;
   }
 
   .on-hover {
@@ -831,6 +799,10 @@ export default {
     border-radius: 8px 8px 0 0 !important;
     height: 230px !important;
     width: 100%;
+  }
+
+  .article-cover :deep(.v-img__img) {
+    object-fit: cover !important;
   }
 
   .article-cover div {
@@ -910,7 +882,7 @@ export default {
 }
 
 .guanzhu .gitee {
-  background: url(data:image/jpeg;base64,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) no-repeat;
+  background: url(data:image/jpeg;base64,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) no-repeat;
   background-size: 25px;
   background-position-y: 47%;
 }
@@ -990,6 +962,9 @@ export default {
 }
 
 .author-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: all 0.5s;
 }
 

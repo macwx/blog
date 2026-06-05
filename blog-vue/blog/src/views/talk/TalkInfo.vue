@@ -20,7 +20,7 @@
               </v-icon>
             </div>
             <!-- 发表时间 -->
-            <div class="time">{{ talkInfo.createTime | time }}</div>
+            <div class="time">{{ formatTime(talkInfo.createTime) }}</div>
             <!-- 说说信息 -->
             <div class="talk-content" v-html="talkInfo.content" />
             <!-- 图片列表 -->
@@ -45,7 +45,7 @@
               <div class="talk-operation-item">
                 <v-icon
                   size="16"
-                  :color="isLike(talkInfo.id)"
+                  :color="getLikeColor(talkInfo.id)"
                   class="like-btn"
                   @click.prevent="like(talkInfo)"
                 >
@@ -71,79 +71,76 @@
   </div>
 </template>
 
-<script>
-import Comment from "../../components/TalkComment";
-export default {
-  components: {
-    Comment
-  },
-  created() {
-    this.getTalkById();
-  },
-  data: function() {
-    return {
-      commentType: 3,
-      commentCount: 0,
-      talkInfo: {},
-      previewList: []
-    };
-  },
-  methods: {
-    getTalkById() {
-      this.axios
-        .get("/api/talks/" + this.$route.params.talkId)
-        .then(({ data }) => {
-          this.talkInfo = data.data;
-          this.previewList = this.talkInfo.imgList;
-        });
-    },
-    getCommentCount(count) {
-      this.commentCount = count;
-    },
-    previewImg(img) {
-      this.$imagePreview({
-        images: this.previewList,
-        index: this.previewList.indexOf(img)
-      });
-    },
-    like(talk) {
-      // 判断登录
-      if (!this.$store.state.userId) {
-        this.$store.state.loginFlag = true;
-        return false;
-      }
-      // 发送请求
-      this.axios.post("/api/talks/" + talk.id + "/like").then(({ data }) => {
-        if (data.flag) {
-          // 判断是否点赞
-          if (this.$store.state.talkLikeSet.indexOf(talk.id) != -1) {
-            this.$set(talk, "likeCount", talk.likeCount - 1);
-          } else {
-            this.$set(talk, "likeCount", talk.likeCount + 1);
-          }
-          this.$store.commit("talkLike", talk.id);
-        }
-      });
-    }
-  },
-  computed: {
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "talk") {
-          cover = item.pageCover;
-        }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    },
-    isLike() {
-      return function(talkId) {
-        var talkLikeSet = this.$store.state.talkLikeSet;
-        return talkLikeSet.indexOf(talkId) != -1 ? "#eb5055" : "#999";
-      };
-    }
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import Comment from "../../components/TalkComment.vue";
+
+const store = useBlogStore();
+const route = useRoute();
+
+const commentType = ref(3);
+const commentCount = ref(0);
+const talkInfo = ref({});
+const previewList = ref([]);
+
+function formatTime(time) {
+  // TODO: Vue3 migration - replaced | time filter
+  return time;
+}
+
+function getLikeColor(talkId) {
+  return store.talkLikeSet.indexOf(talkId) != -1 ? "#eb5055" : "#999";
+}
+
+function getTalkById() {
+  axios.get("/api/talks/" + route.params.talkId).then(({ data }) => {
+    talkInfo.value = data.data;
+    previewList.value = talkInfo.value.imgList;
+  });
+}
+
+function getCommentCount(count) {
+  commentCount.value = count;
+}
+
+function previewImg(img) {
+  // TODO: Vue3 migration - $imagePreview removed, use basic preview
+  window.open(img, "_blank");
+}
+
+function like(talk) {
+  if (!store.userId) {
+    store.loginFlag = true;
+    return false;
   }
-};
+  axios.post("/api/talks/" + talk.id + "/like").then(({ data }) => {
+    if (data.flag) {
+      if (store.talkLikeSet.indexOf(talk.id) != -1) {
+        talk.likeCount = talk.likeCount - 1;
+      } else {
+        talk.likeCount = talk.likeCount + 1;
+      }
+      store.talkLike(talk.id);
+    }
+  });
+}
+
+const cover = computed(() => {
+  var c = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "talk") {
+      c = item.pageCover;
+    }
+  });
+  return "background: url(" + c + ") center center / cover no-repeat";
+});
+
+onMounted(() => {
+  getTalkById();
+});
 </script>
 
 <style scoped>

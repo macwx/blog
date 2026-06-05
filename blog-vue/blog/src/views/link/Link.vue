@@ -39,54 +39,51 @@
         <div>地址：{{ blogInfo.websiteConfig.websiteAddress }}</div>
       </blockquote>
       <div class="mt-5 mb-5">
-        需要交换友链的可在下方留言💖
+        需要交换友链的可在下方留言
       </div>
       <blockquote class="mb-10">
         友链信息展示需要，你的信息格式要包含：名称、介绍、链接、头像
       </blockquote>
       <!-- 评论 -->
-      <Comment :type="this.commentType" />
+      <Comment :type="commentType" />
     </v-card>
   </div>
 </template>
 
-<script>
-import Comment from "../../components/Comment";
-export default {
-  components: {
-    Comment
-  },
-  created() {
-    this.listFriendLink();
-  },
-  data: function() {
-    return {
-      friendLinkList: [],
-      commentType: 2
-    };
-  },
-  methods: {
-    listFriendLink() {
-      this.axios.get("/api/links").then(({ data }) => {
-        this.friendLinkList = data.data;
-      });
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import Comment from "../../components/Comment.vue";
+
+const store = useBlogStore();
+
+const friendLinkList = ref([]);
+const commentType = ref(2);
+
+function listFriendLink() {
+  axios.get("/api/links").then(({ data }) => {
+    friendLinkList.value = data.data;
+  });
+}
+
+const blogInfo = computed(() => {
+  return store.blogInfo;
+});
+
+const cover = computed(() => {
+  var c = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "link") {
+      c = item.pageCover;
     }
-  },
-  computed: {
-    blogInfo() {
-      return this.$store.state.blogInfo;
-    },
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "link") {
-          cover = item.pageCover;
-        }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    }
-  }
-};
+  });
+  return "background: url(" + c + ") center center / cover no-repeat";
+});
+
+onMounted(() => {
+  listFriendLink();
+});
 </script>
 
 <style scoped>

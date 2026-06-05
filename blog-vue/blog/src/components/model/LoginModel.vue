@@ -63,121 +63,124 @@
   </v-dialog>
 </template>
 
-<script>
-export default {
-  data: function() {
-    return {
-      username: "",
-      password: "",
-      show: false
-    };
+<script setup>
+import { ref, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
+import config from "@/assets/js/config";
+
+const store = useBlogStore();
+const router = useRouter();
+const route = useRoute();
+const { toast } = useToast();
+
+const username = ref("");
+const password = ref("");
+const show = ref(false);
+
+const loginFlag = computed({
+  get() {
+    return store.loginFlag;
   },
-  computed: {
-    loginFlag: {
-      set(value) {
-        this.$store.state.loginFlag = value;
-      },
-      get() {
-        return this.$store.state.loginFlag;
-      }
-    },
-    isMobile() {
-      const clientWidth = document.documentElement.clientWidth;
-      if (clientWidth > 960) {
-        return false;
-      }
-      return true;
-    },
-    socialLoginList() {
-      return this.$store.state.blogInfo.websiteConfig.socialLoginList || [];
-    },
-    showLogin() {
-      return function(type) {
-        return this.socialLoginList && this.socialLoginList.indexOf(type) != -1;
-      };
-    }
+  set(value) {
+    store.loginFlag = value;
   },
-  methods: {
-    openRegister() {
-      this.$store.state.loginFlag = false;
-      this.$store.state.registerFlag = true;
-    },
-    openForget() {
-      this.$store.state.loginFlag = false;
-      this.$store.state.forgetFlag = true;
-    },
-    login() {
-      var reg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-      if (!reg.test(this.username)) {
-        this.$toast({ type: "error", message: "邮箱格式不正确" });
-        return false;
-      }
-      if (this.password.trim().length == 0) {
-        this.$toast({ type: "error", message: "密码不能为空" });
-        return false;
-      }
-      const that = this;
-      // eslint-disable-next-line no-undef
-      var captcha = new TencentCaptcha(this.config.TENCENT_CAPTCHA, function(
-        res
-      ) {
-        if (res.ret === 0) {
-          //发送登录请求
-          let param = new URLSearchParams();
-          param.append("username", that.username);
-          param.append("password", that.password);
-          that.axios.post("/api/login", param).then(({ data }) => {
-            if (data.flag) {
-              that.username = "";
-              that.password = "";
-              that.$store.commit("login", data.data);
-              that.$store.commit("closeModel");
-              that.$toast({ type: "success", message: "登录成功" });
-            } else {
-              that.$toast({ type: "error", message: data.message });
-            }
-          });
+});
+
+const isMobile = computed(() => {
+  const clientWidth = document.documentElement.clientWidth;
+  return clientWidth <= 960;
+});
+
+const socialLoginList = computed(() => {
+  return store.blogInfo.websiteConfig.socialLoginList || [];
+});
+
+function showLogin(type) {
+  return socialLoginList.value && socialLoginList.value.indexOf(type) !== -1;
+}
+
+function openRegister() {
+  store.loginFlag = false;
+  store.registerFlag = true;
+}
+
+function openForget() {
+  store.loginFlag = false;
+  store.forgetFlag = true;
+}
+
+function login() {
+  var reg = /^[A-Za-z0-9一-龥]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+  if (!reg.test(username.value)) {
+    toast({ type: "error", message: "邮箱格式不正确" });
+    return false;
+  }
+  if (password.value.trim().length == 0) {
+    toast({ type: "error", message: "密码不能为空" });
+    return false;
+  }
+  // eslint-disable-next-line no-undef
+  var captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, function (res) {
+    if (res.ret === 0) {
+      //发送登录请求
+      let param = new URLSearchParams();
+      param.append("username", username.value);
+      param.append("password", password.value);
+      axios.post("/api/login", param).then(({ data }) => {
+        if (data.flag) {
+          username.value = "";
+          password.value = "";
+          store.login(data.data);
+          store.closeModel();
+          toast({ type: "success", message: "登录成功" });
+        } else {
+          toast({ type: "error", message: data.message });
         }
       });
-      // 显示验证码
-      captcha.show();
-    },
-    qqLogin() {
-      //保留当前路径
-      this.$store.commit("saveLoginUrl", this.$route.path);
-      if (
-        navigator.userAgent.match(
-          /(iPhone|iPod|Android|ios|iOS|iPad|Backerry|WebOS|Symbian|Windows Phone|Phone)/i
-        )
-      ) {
-        // eslint-disable-next-line no-undef
-        QC.Login.showPopup({
-          appId: this.config.QQ_APP_ID,
-          redirectURI: this.config.QQ_REDIRECT_URI
-        });
-      } else {
-        window.open(
-          "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=" +
-            +this.config.QQ_APP_ID +
-            "&response_type=token&scope=all&redirect_uri=" +
-            this.config.QQ_REDIRECT_URI,
-          "_self"
-        );
-      }
-    },
-    weiboLogin() {
-      //保留当前路径
-      this.$store.commit("saveLoginUrl", this.$route.path);
-      window.open(
-        "https://api.weibo.com/oauth2/authorize?client_id=" +
-          this.config.WEIBO_APP_ID +
-          "&response_type=code&redirect_uri=" +
-          this.config.WEIBO_REDIRECT_URI,
-        "_self"
-      );
     }
+  });
+  // 显示验证码
+  captcha.show();
+}
+
+function qqLogin() {
+  //保留当前路径
+  store.saveLoginUrl(route.path);
+  if (
+    navigator.userAgent.match(
+      /(iPhone|iPod|Android|ios|iOS|iPad|Backerry|WebOS|Symbian|Windows Phone|Phone)/i
+    )
+  ) {
+    // eslint-disable-next-line no-undef
+    QC.Login.showPopup({
+      appId: config.QQ_APP_ID,
+      redirectURI: config.QQ_REDIRECT_URI,
+    });
+  } else {
+    window.open(
+      "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=" +
+        +config.QQ_APP_ID +
+        "&response_type=token&scope=all&redirect_uri=" +
+        config.QQ_REDIRECT_URI,
+      "_self"
+    );
   }
-};
+}
+
+function weiboLogin() {
+  //保留当前路径
+  store.saveLoginUrl(route.path);
+  window.open(
+    "https://api.weibo.com/oauth2/authorize?client_id=" +
+      config.WEIBO_APP_ID +
+      "&response_type=code&redirect_uri=" +
+      config.WEIBO_REDIRECT_URI,
+    "_self"
+  );
+}
 </script>
 
 <style scoped>

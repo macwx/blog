@@ -18,25 +18,22 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import EmojiList from "../assets/js/emoji";
-export default {
-  props: {
-    chooseEmoji: {
-      type: Boolean
-    }
-  },
-  data: function() {
-    return {
-      emojiList: EmojiList
-    };
-  },
-  methods: {
-    addEmoji(key) {
-      this.$emit("addEmoji", key);
-    }
+
+defineProps({
+  chooseEmoji: {
+    type: Boolean
   }
-};
+});
+
+const emit = defineEmits(["addEmoji"]);
+
+const emojiList = EmojiList;
+
+function addEmoji(key) {
+  emit("addEmoji", key);
+}
 </script>
 
 <style scoped>

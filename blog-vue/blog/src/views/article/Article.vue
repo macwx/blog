@@ -10,7 +10,7 @@
             <!-- 发表时间 -->
             <span>
               <i class="iconfont iconrili"/>
-              发表于 {{ article.createTime | date }}
+              发表于 {{ $filters.date(article.createTime) }}
             </span>
             <span class="separator">|</span>
             <!-- 发表时间 -->
@@ -18,10 +18,10 @@
               <i class="iconfont icongengxinshijian"/>
               更新于
               <template v-if="article.updateTime">
-                {{ article.updateTime | date }}
+                {{ $filters.date(article.updateTime) }}
               </template>
               <template v-else>
-                {{ article.createTime | date }}
+                {{ $filters.date(article.createTime) }}
               </template>
             </span>
             <span class="separator">|</span>
@@ -37,7 +37,7 @@
             <!-- 字数统计 -->
             <span>
               <i class="iconfont iconzishu"/>
-              字数统计: {{ wordNum | num }}
+              字数统计: {{ $filters.num(wordNum) }}
             </span>
             <span class="separator">|</span>
             <!-- 阅读时长 -->
@@ -69,7 +69,7 @@
               id="write"
               class="article-content markdown-body"
               v-html="article.articleContent"
-              ref="article"
+              ref="articleRef"
           />
           <div class="article-fileAttach">
             <div>
@@ -88,7 +88,7 @@
             <div>
               <span>文章作者：</span>
               <router-link to="/">
-                {{ blogInfo.websiteConfig.websiteAuthor }}
+                {{ store.blogInfo.websiteConfig.websiteAuthor }}
               </router-link>
             </div>
             <div>
@@ -106,6 +106,7 @@
               许可协议。转载请注明文章出处。
             </div>
           </div>
+          <!-- TODO: Vue3 migration - removed vue-social-share dependency -->
           <!-- 转发 -->
           <div class="article-operation">
             <div class="tag-container">
@@ -117,7 +118,7 @@
                 {{ item.tagName }}
               </router-link>
             </div>
-            <share style="margin-left:auto" :config="config"/>
+            <!-- <share style="margin-left:auto" :config="config"/> -->
           </div>
           <!-- 点赞打赏等 -->
           <div class="article-reward">
@@ -129,7 +130,7 @@
                   article.likeCount
                 }}</span>
             </a>
-            <a class="reward-btn" v-if="blogInfo.websiteConfig.isReward == 1">
+            <a class="reward-btn" v-if="store.blogInfo.websiteConfig.isReward == 1">
               <!-- 打赏按钮 -->
               <i class="iconfont iconerweima"/> 打赏
               <!-- 二维码 -->
@@ -138,14 +139,14 @@
                   <li class="reward-item">
                     <img
                         class="reward-img"
-                        :src="blogInfo.websiteConfig.weiXinQRCode"
+                        :src="store.blogInfo.websiteConfig.weiXinQRCode"
                     />
                     <div class="reward-desc">微信</div>
                   </li>
                   <li class="reward-item">
                     <img
                         class="reward-img"
-                        :src="blogInfo.websiteConfig.alipayQRCode"
+                        :src="store.blogInfo.websiteConfig.alipayQRCode"
                     />
                     <div class="reward-desc">支付宝</div>
                   </li>
@@ -211,7 +212,7 @@
                   <div class="recommend-info">
                     <div class="recommend-date">
                       <i class="iconfont iconrili"/>
-                      {{ item.createTime | date }}
+                      {{ $filters.date(item.createTime) }}
                     </div>
                     <div>{{ item.articleTitle }}</div>
                   </div>
@@ -222,7 +223,7 @@
           <!-- 分割线 -->
           <hr/>
           <!-- 评论 -->
-          <comment :type="commentType" @getCommentCount="getCommentCount"/>
+          <Comment :type="commentType" @getCommentCount="getCommentCount"/>
         </v-card>
       </v-col>
       <!-- 侧边功能 -->
@@ -257,7 +258,7 @@
                       {{ item.articleTitle }}
                     </router-link>
                   </div>
-                  <div class="content-time">{{ item.createTime | date }}</div>
+                  <div class="content-time">{{ $filters.date(item.createTime) }}</div>
                 </div>
               </div>
             </div>
@@ -268,165 +269,166 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, nextTick, onUnmounted } from "vue";
+import { useRoute } from "vue-router";
+import axios from "axios";
+import { useBlogStore } from "@/store";
 import Clipboard from "clipboard";
 import markdownToHtml from "../../utils/markdown";
-import Comment from "../../components/Comment";
+import Comment from "../../components/Comment.vue";
 import tocbot from "tocbot";
 
-export default {
-  components: {
-    Comment
+const store = useBlogStore();
+const route = useRoute();
+
+// Refs
+const articleRef = ref(null);
+const imgList = ref([]);
+const article = ref({
+  nextArticle: {
+    id: 0,
+    articleCover: ""
   },
-  created() {
-    this.getArticle();
+  lastArticle: {
+    id: 0,
+    articleCover: ""
   },
-  destroyed() {
-    this.clipboard.destroy();
-    tocbot.destroy();
-  },
-  data: function () {
-    return {
-      config: {
-        sites: ["qzone", "wechat", "weibo", "qq"]
-      },
-      imgList: [],
-      article: {
-        nextArticle: {
-          id: 0,
-          articleCover: ""
-        },
-        lastArticle: {
-          id: 0,
-          articleCover: ""
-        },
-        fileVoAttachList: [],
-        recommendArticleList: [],
-        newestArticleList: []
-      },
-      wordNum: "",
-      readTime: "",
-      commentType: 1,
-      articleHref: window.location.href,
-      clipboard: null,
-      commentCount: 0
-    };
-  },
-  methods: {
-    getArticle() {
-      const that = this;
-      //查询文章
-      this.axios.get("/api" + this.$route.path).then(({data}) => {
-        document.title = data.data.articleTitle;
-        //将markdown转换为Html
-        this.article = data.data;
-        this.article.articleContent = markdownToHtml(
-            this.article.articleContent
-        );
-        this.$nextTick(() => {
-          // 统计文章字数
-          this.wordNum = this.deleteHTMLTag(this.article.articleContent).length;
-          // 计算阅读时间
-          this.readTime = Math.round(this.wordNum / 400) + "分钟";
-          // 添加代码复制功能
-          this.clipboard = new Clipboard(".copy-btn");
-          this.clipboard.on("success", () => {
-            this.$toast({type: "success", message: "复制成功"});
-          });
-          // 添加文章生成目录功能
-          let nodes = this.$refs.article.children;
-          if (nodes.length) {
-            for (let i = 0; i < nodes.length; i++) {
-              let node = nodes[i];
-              let reg = /^H[1-4]{1}$/;
-              if (reg.exec(node.tagName)) {
-                node.id = i;
-              }
+  fileVoAttachList: [],
+  recommendArticleList: [],
+  newestArticleList: []
+});
+const wordNum = ref("");
+const readTime = ref("");
+const commentType = ref(1);
+const articleHref = ref(window.location.href);
+let clipboardInstance = null;
+const commentCount = ref(0);
+
+// Computed
+const articleCover = computed(() => {
+  return (
+      "background: url(" +
+      article.value.articleCover +
+      ") center center / cover no-repeat"
+  );
+});
+
+const isLike = computed(() => {
+  var articleLikeSet = store.articleLikeSet;
+  return articleLikeSet.indexOf(article.value.id) != -1
+      ? "like-btn-active"
+      : "like-btn";
+});
+
+function isFull(id) {
+  return id ? "post full" : "post";
+}
+
+// Methods
+function deleteHTMLTag(content) {
+  return content
+      .replace(/<\/?[^>]*>/g, "")
+      .replace(/[|]*\n/, "")
+      .replace(/&npsp;/gi, "");
+}
+
+function getCommentCount(count) {
+  commentCount.value = count;
+}
+
+function getArticle() {
+  axios.get("/api" + route.path).then(({ data }) => {
+    document.title = data.data.articleTitle;
+    article.value = data.data;
+    article.value.articleContent = markdownToHtml(
+        article.value.articleContent
+    );
+    nextTick(() => {
+      // 统计文章字数
+      wordNum.value = deleteHTMLTag(article.value.articleContent).length;
+      // 计算阅读时间
+      readTime.value = Math.round(wordNum.value / 400) + "分钟";
+      // 添加代码复制功能
+      clipboardInstance = new Clipboard(".copy-btn");
+      clipboardInstance.on("success", () => {
+        // TODO: Vue3 migration - implement toast notification
+        // toast.success("复制成功");
+        console.log("复制成功");
+      });
+      // 添加文章生成目录功能
+      if (articleRef.value) {
+        let nodes = articleRef.value.children;
+        if (nodes.length) {
+          for (let i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
+            let reg = /^H[1-4]{1}$/;
+            if (reg.exec(node.tagName)) {
+              node.id = i;
             }
           }
-          tocbot.init({
-            tocSelector: "#toc", //要把目录添加元素位置，支持选择器
-            contentSelector: ".article-content", //获取html的元素
-            headingSelector: "h1, h2, h3", //要显示的id的目录
-            hasInnerContainers: true,
-            onClick: function (e) {
-              e.preventDefault();
-            }
+        }
+      }
+      tocbot.init({
+        tocSelector: "#toc",
+        contentSelector: ".article-content",
+        headingSelector: "h1, h2, h3",
+        hasInnerContainers: true,
+        onClick: function (e) {
+          e.preventDefault();
+        }
+      });
+      // TODO: Vue3 migration - removed vue-image-swipe dependency
+      // 添加图片预览功能 - 需要替代方案
+      if (articleRef.value) {
+        const imgs = articleRef.value.getElementsByTagName("img");
+        for (var i = 0; i < imgs.length; i++) {
+          imgList.value.push(imgs[i].src);
+          imgs[i].addEventListener("click", function (e) {
+            // TODO: Vue3 migration - implement image preview
+            // previewImg(e.target.currentSrc);
+            console.log("Image preview clicked:", e.target.currentSrc);
           });
-          // 添加图片预览功能
-          const imgList = this.$refs.article.getElementsByTagName("img");
-          for (var i = 0; i < imgList.length; i++) {
-            this.imgList.push(imgList[i].src);
-            imgList[i].addEventListener("click", function (e) {
-              that.previewImg(e.target.currentSrc);
-            });
+        }
+      }
+    });
+  });
+}
+
+function like() {
+  axios
+      .post("/api/articles/" + article.value.id + "/like")
+      .then(({ data }) => {
+        if (data.flag) {
+          if (
+              store.articleLikeSet.indexOf(article.value.id) != -1
+          ) {
+            article.value.likeCount = article.value.likeCount - 1;
+          } else {
+            article.value.likeCount = article.value.likeCount + 1;
           }
-        });
+          store.articleLike(article.value.id);
+        }
       });
-    },
-    like() {
-      // 判断登录
-      // if (!this.$store.state.userId) {
-      //   this.$store.state.loginFlag = true;
-      //   return false;
-      // }
-      //发送请求
-      this.axios
-          .post("/api/articles/" + this.article.id + "/like")
-          .then(({data}) => {
-            if (data.flag) {
-              //判断是否点赞
-              if (
-                  this.$store.state.articleLikeSet.indexOf(this.article.id) != -1
-              ) {
-                this.$set(this.article, "likeCount", this.article.likeCount - 1);
-              } else {
-                this.$set(this.article, "likeCount", this.article.likeCount + 1);
-              }
-              this.$store.commit("articleLike", this.article.id);
-            }
-          });
-    },
-    previewImg(img) {
-      this.$imagePreview({
-        images: this.imgList,
-        index: this.imgList.indexOf(img)
-      });
-    },
-    deleteHTMLTag(content) {
-      return content
-          .replace(/<\/?[^>]*>/g, "")
-          .replace(/[|]*\n/, "")
-          .replace(/&npsp;/gi, "");
-    },
-    getCommentCount(count) {
-      this.commentCount = count;
-    }
-  },
-  computed: {
-    blogInfo() {
-      return this.$store.state.blogInfo;
-    },
-    articleCover() {
-      return (
-          "background: url(" +
-          this.article.articleCover +
-          ") center center / cover no-repeat"
-      );
-    },
-    isLike() {
-      var articleLikeSet = this.$store.state.articleLikeSet;
-      return articleLikeSet.indexOf(this.article.id) != -1
-          ? "like-btn-active"
-          : "like-btn";
-    },
-    isFull() {
-      return function (id) {
-        return id ? "post full" : "post";
-      };
-    }
+}
+
+// TODO: Vue3 migration - removed vue-image-swipe dependency
+// function previewImg(img) {
+//   this.$imagePreview({
+//     images: imgList.value,
+//     index: imgList.value.indexOf(img)
+//   });
+// }
+
+// Lifecycle
+getArticle();
+
+onUnmounted(() => {
+  if (clipboardInstance) {
+    clipboardInstance.destroy();
   }
-};
+  tocbot.destroy();
+});
 </script>
 
 <style scoped>

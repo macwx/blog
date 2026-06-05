@@ -102,63 +102,46 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    totalPage: {
-      type: Number
-    },
-    index: {
-      type: Number
-    },
-    commentId: {
-      type: Number
-    }
+<script setup>
+import { ref } from "vue";
+
+const props = defineProps({
+  totalPage: {
+    type: Number
   },
-  data: function() {
-    return {
-      current: 1
-    };
+  index: {
+    type: Number
   },
-  methods: {
-    changeReplyCurrent(i) {
-      this.current = i;
-      this.$emit(
-        "changeReplyCurrent",
-        this.current,
-        this.index,
-        this.commentId
-      );
-    },
-    prePage() {
-      this.current -= 1;
-      this.$emit(
-        "changeReplyCurrent",
-        this.current,
-        this.index,
-        this.commentId
-      );
-    },
-    nextPage() {
-      this.current += 1;
-      this.$emit(
-        "changeReplyCurrent",
-        this.current,
-        this.index,
-        this.commentId
-      );
-    }
-  },
-  computed: {
-    isActive() {
-      return function(i) {
-        if (i == this.current) {
-          return "active";
-        }
-      };
-    }
+  commentId: {
+    type: Number
   }
-};
+});
+
+const emit = defineEmits(["changeReplyCurrent"]);
+
+const current = ref(1);
+
+function isActive(i) {
+  if (i === current.value) {
+    return "active";
+  }
+  return "";
+}
+
+function changeReplyCurrent(i) {
+  current.value = i;
+  emit("changeReplyCurrent", current.value, props.index, props.commentId);
+}
+
+function prePage() {
+  current.value -= 1;
+  emit("changeReplyCurrent", current.value, props.index, props.commentId);
+}
+
+function nextPage() {
+  current.value += 1;
+  emit("changeReplyCurrent", current.value, props.index, props.commentId);
+}
 </script>
 
 <style scoped>

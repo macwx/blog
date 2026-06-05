@@ -31,7 +31,7 @@
           @mousemove.prevent.stop="translationmove($event)"
           @mouseup.prevent.stop="translationEnd($event)"
         >
-          <v-icon ref="voiceClose" class="close-voice">mdi-close</v-icon>
+          <v-icon ref="voiceCloseRef" class="close-voice">mdi-close</v-icon>
         </div>
         <div
           :class="isMyMessage(item)"
@@ -43,11 +43,11 @@
           <div>
             <div class="nickname" v-if="!isSelf(item)">
               {{ item.nickname }}
-              <span style="margin-left:12px">{{ item.createTime | hour }}</span>
+              <span style="margin-left:12px">{{ formatHour(item.createTime) }}</span>
             </div>
             <!-- 内容 -->
             <div
-              ref="content"
+              :ref="el => { if (el) contentRefs[index] = el }"
               @contextmenu.prevent.stop="showBack(item, index, $event)"
               :class="isMyContent(item)"
             >
@@ -58,14 +58,14 @@
                 <audio
                   @ended="endVoice(item)"
                   @canplay="getVoiceTime(item)"
-                  ref="voices"
+                  :ref="el => { if (el) voicesRefs[item.id] = el }"
                   :src="item.content"
                   style="display:none"
                 />
                 <!-- 播放 -->
                 <v-icon
                   :color="isSelf(item) ? '#fff' : '#000'"
-                  ref="plays"
+                  :ref="el => { if (el) playsRefs[item.id] = el }"
                   style="display:inline-flex;cursor: pointer;"
                 >
                   mdi-arrow-right-drop-circle
@@ -73,15 +73,19 @@
                 <!-- 暂停 -->
                 <v-icon
                   :color="isSelf(item) ? '#fff' : '#000'"
-                  ref="pauses"
+                  :ref="el => { if (el) pausesRefs[item.id] = el }"
                   style="display:none;cursor: pointer;"
                 >
                   mdi-pause-circle
                 </v-icon>
                 <!-- 音频时长 -->
-                <span ref="voiceTimes" />
+                <span :ref="el => { if (el) voiceTimesRefs[item.id] = el }" />
               </div>
-              <div class="back-menu" ref="backBtn" @click="back(item, index)">
+              <div
+                class="back-menu"
+                :ref="el => { if (el) backBtnRefs[index] = el }"
+                @click="back(item, index)"
+              >
                 撤回
               </div>
             </div>
@@ -113,7 +117,7 @@
         <!-- 文字输入 -->
         <textarea
           v-show="!isVoice"
-          ref="chatInput"
+          ref="chatInputRef"
           v-model="content"
           @keydown.enter="saveMessage($event)"
           placeholder="请输入内容"
@@ -152,340 +156,359 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, computed, onMounted, onUpdated, onBeforeUnmount, nextTick } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
 import Recorderx, { ENCODE_TYPE } from "recorderx";
-import Emoji from "./Emoji";
+import Emoji from "./Emoji.vue";
 import EmojiList from "../assets/js/emoji";
-export default {
-  components: {
-    Emoji
-  },
-  updated() {
-    var ele = document.getElementById("message");
-    ele.scrollTop = ele.scrollHeight;
-  },
-  beforeDestroy() {
-    clearInterval(this.heartBeat);
-  },
-  data: function() {
-    return {
-      isEmoji: false,
-      isShow: false,
-      websocket: null,
-      content: "",
-      chatRecordList: [],
-      voiceList: [],
-      rc: null,
-      ipAddress: "",
-      ipSource: "",
-      count: 0,
-      unreadCount: 0,
-      isVoice: false,
-      voiceActive: false,
-      startVoiceTime: null,
-      WebsocketMessage: {
-        type: null,
-        data: null
-      },
-      heartBeat: null
-    };
-  },
-  methods: {
-    open() {
-      if (this.websocket == null) {
-        this.connect();
-      }
-      this.unreadCount = 0;
-      this.isShow = !this.isShow;
-    },
-    openEmoji() {
-      this.isEmoji = !this.isEmoji;
-      this.isVoice = false;
-    },
-    connect() {
-      var that = this;
-      // 生成或获取客户端唯一标识
-      var clientId = localStorage.getItem("chat_client_id");
-      if (!clientId) {
-        clientId = "cid_" + Math.random().toString(36).substr(2, 16) + "_" + Date.now();
-        localStorage.setItem("chat_client_id", clientId);
-      }
-      this.websocket = new WebSocket(this.blogInfo.websiteConfig.websocketUrl + "?clientId=" + clientId);
-      // 连接发生错误的回调方法
-      this.websocket.onerror = function(event) {
-        console.log(event);
-        alert("失败");
+
+const store = useBlogStore();
+const toast = useToast();
+
+// Refs for DOM elements
+const chatInputRef = ref(null);
+const voiceCloseRef = ref(null);
+const voicesRefs = reactive({});
+const playsRefs = reactive({});
+const pausesRefs = reactive({});
+const voiceTimesRefs = reactive({});
+const backBtnRefs = reactive({});
+const contentRefs = reactive({});
+
+const isEmoji = ref(false);
+const isShow = ref(false);
+const websocket = ref(null);
+const content = ref("");
+const chatRecordList = ref([]);
+const voiceList = ref([]);
+let rc = null;
+const ipAddress = ref("");
+const ipSource = ref("");
+const count = ref(0);
+const unreadCount = ref(0);
+const isVoice = ref(false);
+const voiceActive = ref(false);
+const startVoiceTime = ref(null);
+const WebsocketMessage = reactive({
+  type: null,
+  data: null
+});
+let heartBeat = null;
+
+function formatHour(time) {
+  // TODO: Vue3 migration - replaced | hour filter
+  return time;
+}
+
+function isSelf(item) {
+  return (
+    item.ipAddress == ipAddress.value ||
+    (item.userId != null && item.userId == store.userId)
+  );
+}
+
+function isleft(item) {
+  return isSelf(item)
+    ? "user-avatar right-avatar"
+    : "user-avatar left-avatar";
+}
+
+function isMyContent(item) {
+  return isSelf(item) ? "my-content" : "user-content";
+}
+
+function isMyMessage(item) {
+  return isSelf(item) ? "my-message" : "user-message";
+}
+
+const blogInfo = computed(() => {
+  return store.blogInfo;
+});
+
+const nickname = computed(() => {
+  return store.nickname != null
+    ? store.nickname
+    : ipAddress.value;
+});
+
+const avatar = computed(() => {
+  return store.avatar != null
+    ? store.avatar
+    : store.blogInfo.websiteConfig.touristAvatar;
+});
+
+const isInput = computed(() => {
+  return content.value.trim() != ""
+    ? "iconfont iconzhifeiji submit-btn"
+    : "iconfont iconzhifeiji";
+});
+
+function open() {
+  if (websocket.value == null) {
+    connect();
+  }
+  unreadCount.value = 0;
+  isShow.value = !isShow.value;
+}
+
+function openEmoji() {
+  isEmoji.value = !isEmoji.value;
+  isVoice.value = false;
+}
+
+function connect() {
+  // 生成或获取客户端唯一标识
+  var clientId = localStorage.getItem("chat_client_id");
+  if (!clientId) {
+    clientId = "cid_" + Math.random().toString(36).substr(2, 16) + "_" + Date.now();
+    localStorage.setItem("chat_client_id", clientId);
+  }
+  websocket.value = new WebSocket(blogInfo.value.websiteConfig.websocketUrl + "?clientId=" + clientId);
+  websocket.value.onerror = function(event) {
+    console.log(event);
+    alert("失败");
+  };
+  websocket.value.onopen = function(event) {
+    console.log(event);
+    heartBeat = setInterval(function() {
+      var beatMessage = {
+        type: 6,
+        data: "ping"
       };
-      // 连接成功建立的回调方法
-      this.websocket.onopen = function(event) {
-        console.log(event);
-        // 发送心跳消息
-        that.heartBeat = setInterval(function() {
-          var beatMessage = {
-            type: 6,
-            data: "ping"
-          };
-          that.websocket.send(JSON.stringify(beatMessage));
-        }, 30 * 1000);
-      };
-      // 接收到消息的回调方法
-      this.websocket.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        switch (data.type) {
-          case 1:
-            // 在线人数
-            that.count = data.data;
-            break;
-          case 2:
-            // 历史记录
-            that.chatRecordList = data.data.chatRecordList;
-            that.chatRecordList.forEach(item => {
-              if (item.type == 5) {
-                that.voiceList.push(item.id);
-              }
-            });
-            that.ipAddress = data.data.ipAddress;
-            that.ipSource = data.data.ipSource;
-            break;
-          case 3:
-            // 文字消息
-            that.chatRecordList.push(data.data);
-            if (!that.isShow) {
-              that.unreadCount++;
-            }
-            break;
-          case 4:
-            // 撤回
-            if (data.data.isVoice) {
-              that.voiceList.splice(that.voiceList.indexOf(data.data.id), 1);
-            }
-            for (var i = 0; i < that.chatRecordList.length; i++) {
-              if (that.chatRecordList[i].id == data.data.id) {
-                that.chatRecordList.splice(i, 1);
-                i--;
-              }
-            }
-            break;
-          case 5:
-            // 语音消息
-            that.voiceList.push(data.data.id);
-            that.chatRecordList.push(data.data);
-            if (!that.isShow) {
-              that.unreadCount++;
-            }
-            break;
-        }
-      };
-      //连接关闭的回调方法
-      this.websocket.onclose = function() {};
-    },
-    saveMessage(e) {
-      e.preventDefault();
-      if (this.content.trim() == "") {
-        this.$toast({ type: "error", message: "内容不能为空" });
-        return false;
-      }
-      //解析表情
-      var reg = /\[.+?\]/g;
-      this.content = this.content.replace(reg, function(str) {
-        return (
-          "<img src= '" +
-          EmojiList[str] +
-          "' width='24'height='24' style='margin: 0 1px;vertical-align: text-bottom'/>"
-        );
-      });
-      var socketMsg = {
-        nickname: this.nickname,
-        avatar: this.avatar,
-        content: this.content,
-        userId: this.userId,
-        type: 3,
-        ipAddress: this.ipAddress,
-        ipSource: this.ipSource
-      };
-      this.WebsocketMessage.type = 3;
-      this.WebsocketMessage.data = socketMsg;
-      this.websocket.send(JSON.stringify(this.WebsocketMessage));
-      this.content = "";
-    },
-    addEmoji(key) {
-      this.isEmoji = false;
-      this.$refs.chatInput.focus();
-      this.content += key;
-    },
-    // 展示菜单
-    showBack(item, index, e) {
-      this.$refs.backBtn.forEach(item => {
-        item.style.display = "none";
-      });
-      if (
-        item.ipAddress == this.ipAddress ||
-        (item.userId != null && item.userId == this.userId)
-      ) {
-        this.$refs.backBtn[index].style.left = e.offsetX + "px";
-        this.$refs.backBtn[index].style.bottom = e.offsetY + "px";
-        this.$refs.backBtn[index].style.display = "block";
-      }
-    },
-    // 撤回消息
-    back(item, index) {
-      var socketMsg = {
-        id: item.id,
-        isVoice: item.type == 5
-      };
-      this.WebsocketMessage.type = 4;
-      this.WebsocketMessage.data = socketMsg;
-      this.websocket.send(JSON.stringify(this.WebsocketMessage));
-      this.$refs.backBtn[index].style.display = "none";
-    },
-    closeAll() {
-      this.isEmoji = false;
-      if (this.chatRecordList.length > 0) {
-        this.$refs.backBtn.forEach(item => {
-          item.style.display = "none";
+      websocket.value.send(JSON.stringify(beatMessage));
+    }, 30 * 1000);
+  };
+  websocket.value.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    switch (data.type) {
+      case 1:
+        count.value = data.data;
+        break;
+      case 2:
+        chatRecordList.value = data.data.chatRecordList;
+        chatRecordList.value.forEach(item => {
+          if (item.type == 5) {
+            voiceList.value.push(item.id);
+          }
         });
-      }
-    },
-    // 录音开始
-    translationStart() {
-      this.voiceActive = true;
-      let that = this;
-      that.rc = new Recorderx();
-      that.$nextTick(() => {
-        that.rc
-          .start()
-          .then(() => {
-            that.startVoiceTime = new Date();
-            console.log("start recording");
-          })
-          .catch(error => {
-            console.log("Recording failed.", error);
-          });
-      });
-    },
-    // 录音结束
-    translationEnd() {
-      console.log("结束");
-      this.voiceActive = false;
-      this.rc.pause();
-      if (new Date() - this.startVoiceTime < 1000) {
-        this.$toast({ type: "error", message: "按键时间太短" });
-        return false;
-      }
-      var wav = this.rc.getRecord({
-        encodeTo: ENCODE_TYPE.WAV
-      });
-      var file = new File([wav], "voice.wav", {
-        type: wav.type
-      });
-      var formData = new window.FormData();
-      formData.append("file", file);
-      formData.append("type", 5);
-      formData.append("nickname", this.nickname);
-      formData.append("avatar", this.avatar);
-      if (this.userId != null) {
-        formData.append("userId", this.userId);
-      }
-      formData.append("ipAddress", this.ipAddress);
-      formData.append("ipSource", this.ipSource);
-      var options = {
-        url: "/api/voice",
-        data: formData,
-        method: "post",
-        headers: {
-          "Content-Type": "multipart/form-data"
+        ipAddress.value = data.data.ipAddress;
+        ipSource.value = data.data.ipSource;
+        break;
+      case 3:
+        chatRecordList.value.push(data.data);
+        if (!isShow.value) {
+          unreadCount.value++;
         }
-      };
-      this.axios(options);
-    },
-    translationmove() {},
-    // 播放语音
-    playVoice(item) {
-      var player = this.$refs.voices[this.voiceList.indexOf(item.id)];
-      if (player.paused) {
-        player.play();
-        this.$refs.plays[this.voiceList.indexOf(item.id)].$el.style.display =
-          "none";
-        this.$refs.pauses[this.voiceList.indexOf(item.id)].$el.style.display =
-          "inline-flex";
-      } else {
-        this.$refs.plays[this.voiceList.indexOf(item.id)].$el.style.display =
-          "inline-flex";
-        this.$refs.pauses[this.voiceList.indexOf(item.id)].$el.style.display =
-          "none";
-        player.pause();
-      }
-    },
-    // 语音结束
-    endVoice(item) {
-      this.$refs.plays[this.voiceList.indexOf(item.id)].$el.style.display =
-        "inline-flex";
-      this.$refs.pauses[this.voiceList.indexOf(item.id)].$el.style.display =
-        "none";
-    },
-    // 获取语音时长
-    getVoiceTime(item) {
-      var time = this.$refs.voices[this.voiceList.indexOf(item.id)].duration;
-      time = Math.ceil(time);
-      var str = "⬝⬝⬝";
-      for (var i = 0; i < time; i++) {
-        if (i % 2 == 0) {
-          str += "⬝";
+        break;
+      case 4:
+        if (data.data.isVoice) {
+          voiceList.value.splice(voiceList.value.indexOf(data.data.id), 1);
         }
-      }
-      this.$refs.voiceTimes[this.voiceList.indexOf(item.id)].innerHTML =
-        " " + str + " " + time + " ''";
+        for (var i = 0; i < chatRecordList.value.length; i++) {
+          if (chatRecordList.value[i].id == data.data.id) {
+            chatRecordList.value.splice(i, 1);
+            i--;
+          }
+        }
+        break;
+      case 5:
+        voiceList.value.push(data.data.id);
+        chatRecordList.value.push(data.data);
+        if (!isShow.value) {
+          unreadCount.value++;
+        }
+        break;
     }
-  },
-  computed: {
-    isSelf() {
-      return function(item) {
-        return (
-          item.ipAddress == this.ipAddress ||
-          (item.userId != null && item.userId == this.userId)
-        );
-      };
-    },
-    isleft() {
-      return function(item) {
-        return this.isSelf(item)
-          ? "user-avatar right-avatar"
-          : "user-avatar left-avatar";
-      };
-    },
-    isMyContent() {
-      return function(item) {
-        return this.isSelf(item) ? "my-content" : "user-content";
-      };
-    },
-    isMyMessage() {
-      return function(item) {
-        return this.isSelf(item) ? "my-message" : "user-message";
-      };
-    },
-    blogInfo() {
-      return this.$store.state.blogInfo;
-    },
-    nickname() {
-      return this.$store.state.nickname != null
-        ? this.$store.state.nickname
-        : this.ipAddress;
-    },
-    avatar() {
-      return this.$store.state.avatar != null
-        ? this.$store.state.avatar
-        : this.$store.state.blogInfo.websiteConfig.touristAvatar;
-    },
-    userId() {
-      return this.$store.state.userId;
-    },
-    isInput() {
-      return this.content.trim() != ""
-        ? "iconfont iconzhifeiji submit-btn"
-        : "iconfont iconzhifeiji";
+  };
+  websocket.value.onclose = function() {};
+}
+
+function saveMessage(e) {
+  e.preventDefault();
+  if (content.value.trim() == "") {
+    toast({ type: "error", message: "内容不能为空" });
+    return false;
+  }
+  var reg = /\[.+?\]/g;
+  content.value = content.value.replace(reg, function(str) {
+    return (
+      "<img src= '" +
+      EmojiList[str] +
+      "' width='24'height='24' style='margin: 0 1px;vertical-align: text-bottom'/>"
+    );
+  });
+  var socketMsg = {
+    nickname: nickname.value,
+    avatar: avatar.value,
+    content: content.value,
+    userId: store.userId,
+    type: 3,
+    ipAddress: ipAddress.value,
+    ipSource: ipSource.value
+  };
+  WebsocketMessage.type = 3;
+  WebsocketMessage.data = socketMsg;
+  websocket.value.send(JSON.stringify(WebsocketMessage));
+  content.value = "";
+}
+
+function addEmoji(key) {
+  isEmoji.value = false;
+  if (chatInputRef.value) {
+    chatInputRef.value.focus();
+  }
+  content.value += key;
+}
+
+function showBack(item, index, e) {
+  Object.values(backBtnRefs).forEach(el => {
+    if (el) el.style.display = "none";
+  });
+  if (
+    item.ipAddress == ipAddress.value ||
+    (item.userId != null && item.userId == store.userId)
+  ) {
+    if (backBtnRefs[index]) {
+      backBtnRefs[index].style.left = e.offsetX + "px";
+      backBtnRefs[index].style.bottom = e.offsetY + "px";
+      backBtnRefs[index].style.display = "block";
     }
   }
-};
+}
+
+function back(item, index) {
+  var socketMsg = {
+    id: item.id,
+    isVoice: item.type == 5
+  };
+  WebsocketMessage.type = 4;
+  WebsocketMessage.data = socketMsg;
+  websocket.value.send(JSON.stringify(WebsocketMessage));
+  if (backBtnRefs[index]) {
+    backBtnRefs[index].style.display = "none";
+  }
+}
+
+function closeAll() {
+  isEmoji.value = false;
+  if (chatRecordList.value.length > 0) {
+    Object.values(backBtnRefs).forEach(el => {
+      if (el) el.style.display = "none";
+    });
+  }
+}
+
+function translationStart() {
+  voiceActive.value = true;
+  rc = new Recorderx();
+  nextTick(() => {
+    rc
+      .start()
+      .then(() => {
+        startVoiceTime.value = new Date();
+        console.log("start recording");
+      })
+      .catch(error => {
+        console.log("Recording failed.", error);
+      });
+  });
+}
+
+function translationEnd() {
+  console.log("结束");
+  voiceActive.value = false;
+  rc.pause();
+  if (new Date() - startVoiceTime.value < 1000) {
+    toast({ type: "error", message: "按键时间太短" });
+    return false;
+  }
+  var wav = rc.getRecord({
+    encodeTo: ENCODE_TYPE.WAV
+  });
+  var file = new File([wav], "voice.wav", {
+    type: wav.type
+  });
+  var formData = new window.FormData();
+  formData.append("file", file);
+  formData.append("type", 5);
+  formData.append("nickname", nickname.value);
+  formData.append("avatar", avatar.value);
+  if (store.userId != null) {
+    formData.append("userId", store.userId);
+  }
+  formData.append("ipAddress", ipAddress.value);
+  formData.append("ipSource", ipSource.value);
+  var options = {
+    url: "/api/voice",
+    data: formData,
+    method: "post",
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  };
+  axios(options);
+}
+
+function translationmove() {}
+
+function playVoice(item) {
+  var player = voicesRefs[item.id];
+  if (!player) return;
+  var playEl = playsRefs[item.id];
+  var pauseEl = pausesRefs[item.id];
+  if (player.paused) {
+    player.play();
+    if (playEl) playEl.$el.style.display = "none";
+    if (pauseEl) pauseEl.$el.style.display = "inline-flex";
+  } else {
+    if (playEl) playEl.$el.style.display = "inline-flex";
+    if (pauseEl) pauseEl.$el.style.display = "none";
+    player.pause();
+  }
+}
+
+function endVoice(item) {
+  var playEl = playsRefs[item.id];
+  var pauseEl = pausesRefs[item.id];
+  if (playEl) playEl.$el.style.display = "inline-flex";
+  if (pauseEl) pauseEl.$el.style.display = "none";
+}
+
+function getVoiceTime(item) {
+  var player = voicesRefs[item.id];
+  if (!player) return;
+  var time = player.duration;
+  time = Math.ceil(time);
+  var str = "...";
+  for (var i = 0; i < time; i++) {
+    if (i % 2 == 0) {
+      str += ".";
+    }
+  }
+  var timeEl = voiceTimesRefs[item.id];
+  if (timeEl) {
+    timeEl.innerHTML = " " + str + " " + time + " ''";
+  }
+}
+
+onUpdated(() => {
+  var ele = document.getElementById("message");
+  if (ele) {
+    ele.scrollTop = ele.scrollHeight;
+  }
+});
+
+onBeforeUnmount(() => {
+  if (heartBeat) {
+    clearInterval(heartBeat);
+  }
+  if (websocket.value) {
+    websocket.value.close();
+  }
+});
 </script>
 
 <style scoped>

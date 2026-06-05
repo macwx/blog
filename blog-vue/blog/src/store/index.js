@@ -1,118 +1,158 @@
-import Vue from "vue";
-import Vuex from "vuex";
-import createPersistedState from "vuex-persistedstate";
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
 
-Vue.use(Vuex);
-
-export default new Vuex.Store({
-  state: {
-    searchFlag: false,
-    loginFlag: false,
-    registerFlag: false,
-    forgetFlag: false,
-    emailFlag: false,
-    drawer: false,
-    loginUrl: "",
-    userId: null,
-    avatar: null,
-    nickname: null,
-    intro: null,
-    webSite: null,
-    loginType: null,
-    email: null,
-    articleLikeSet: [],
-    commentLikeSet: [],
-    talkLikeSet: [],
-    blogInfo: {
+export const useBlogStore = defineStore(
+  "blog",
+  () => {
+    // State
+    const searchFlag = ref(false);
+    const loginFlag = ref(false);
+    const registerFlag = ref(false);
+    const forgetFlag = ref(false);
+    const emailFlag = ref(false);
+    const drawer = ref(false);
+    const loginUrl = ref("");
+    const userId = ref(null);
+    const avatar = ref(null);
+    const nickname = ref(null);
+    const intro = ref(null);
+    const webSite = ref(null);
+    const loginType = ref(null);
+    const email = ref(null);
+    const articleLikeSet = ref([]);
+    const commentLikeSet = ref([]);
+    const talkLikeSet = ref([]);
+    const blogInfo = ref({
       websiteConfig: {},
       pageList: [],
       articleCount: 0,
       categoryCount: 0,
       tagCount: 0,
-      viewsCount: 0
+      viewsCount: 0,
+    });
+
+    // Getters
+    const isLoggedIn = computed(() => !!userId.value);
+
+    // Actions
+    function login(user) {
+      userId.value = user.userInfoId;
+      avatar.value = user.avatar;
+      nickname.value = user.nickname;
+      intro.value = user.intro;
+      webSite.value = user.webSite;
+      articleLikeSet.value = user.articleLikeSet || [];
+      commentLikeSet.value = user.commentLikeSet || [];
+      talkLikeSet.value = user.talkLikeSet || [];
+      email.value = user.email;
+      loginType.value = user.loginType;
     }
-  },
-  mutations: {
-    login(state, user) {
-      state.userId = user.userInfoId;
-      state.avatar = user.avatar;
-      state.nickname = user.nickname;
-      state.intro = user.intro;
-      state.webSite = user.webSite;
-      state.articleLikeSet = user.articleLikeSet ? user.articleLikeSet : [];
-      state.commentLikeSet = user.commentLikeSet ? user.commentLikeSet : [];
-      state.talkLikeSet = user.talkLikeSet ? user.talkLikeSet : [];
-      state.email = user.email;
-      state.loginType = user.loginType;
-    },
-    logout(state) {
-      state.userId = null;
-      state.avatar = null;
-      state.nickname = null;
-      state.intro = null;
-      state.webSite = null;
-      state.articleLikeSet = [];
-      state.commentLikeSet = [];
-      state.talkLikeSet = [];
-      state.email = null;
-      state.loginType = null;
-    },
-    saveLoginUrl(state, url) {
-      state.loginUrl = url;
-    },
-    saveEmail(state, email) {
-      state.email = email;
-    },
-    updateUserInfo(state, user) {
-      state.nickname = user.nickname;
-      state.intro = user.intro;
-      state.webSite = user.webSite;
-    },
-    savePageInfo(state, pageList) {
-      state.pageList = pageList;
-    },
-    updateAvatar(state, avatar) {
-      state.avatar = avatar;
-    },
-    checkBlogInfo(state, blogInfo) {
-      state.blogInfo = blogInfo;
-    },
-    closeModel(state) {
-      state.registerFlag = false;
-      state.loginFlag = false;
-      state.searchFlag = false;
-      state.emailFlag = false;
-    },
-    articleLike(state, articleId) {
-      var articleLikeSet = state.articleLikeSet;
-      if (articleLikeSet.indexOf(articleId) != -1) {
-        articleLikeSet.splice(articleLikeSet.indexOf(articleId), 1);
+
+    function logout() {
+      userId.value = null;
+      avatar.value = null;
+      nickname.value = null;
+      intro.value = null;
+      webSite.value = null;
+      articleLikeSet.value = [];
+      commentLikeSet.value = [];
+      talkLikeSet.value = [];
+      email.value = null;
+      loginType.value = null;
+    }
+
+    function saveLoginUrl(url) {
+      loginUrl.value = url;
+    }
+
+    function saveEmail(val) {
+      email.value = val;
+    }
+
+    function updateUserInfo(user) {
+      nickname.value = user.nickname;
+      intro.value = user.intro;
+      webSite.value = user.webSite;
+    }
+
+    function updateAvatar(val) {
+      avatar.value = val;
+    }
+
+    function checkBlogInfo(info) {
+      blogInfo.value = info;
+    }
+
+    function closeModel() {
+      registerFlag.value = false;
+      loginFlag.value = false;
+      searchFlag.value = false;
+      emailFlag.value = false;
+    }
+
+    function articleLike(articleId) {
+      const idx = articleLikeSet.value.indexOf(articleId);
+      if (idx !== -1) {
+        articleLikeSet.value.splice(idx, 1);
       } else {
-        articleLikeSet.push(articleId);
-      }
-    },
-    commentLike(state, commentId) {
-      var commentLikeSet = state.commentLikeSet;
-      if (commentLikeSet.indexOf(commentId) != -1) {
-        commentLikeSet.splice(commentLikeSet.indexOf(commentId), 1);
-      } else {
-        commentLikeSet.push(commentId);
-      }
-    },
-    talkLike(state, talkId) {
-      var talkLikeSet = state.talkLikeSet;
-      if (talkLikeSet.indexOf(talkId) != -1) {
-        talkLikeSet.splice(talkLikeSet.indexOf(talkId), 1);
-      } else {
-        talkLikeSet.push(talkId);
+        articleLikeSet.value.push(articleId);
       }
     }
+
+    function commentLike(commentId) {
+      const idx = commentLikeSet.value.indexOf(commentId);
+      if (idx !== -1) {
+        commentLikeSet.value.splice(idx, 1);
+      } else {
+        commentLikeSet.value.push(commentId);
+      }
+    }
+
+    function talkLike(talkId) {
+      const idx = talkLikeSet.value.indexOf(talkId);
+      if (idx !== -1) {
+        talkLikeSet.value.splice(idx, 1);
+      } else {
+        talkLikeSet.value.push(talkId);
+      }
+    }
+
+    return {
+      searchFlag,
+      loginFlag,
+      registerFlag,
+      forgetFlag,
+      emailFlag,
+      drawer,
+      loginUrl,
+      userId,
+      avatar,
+      nickname,
+      intro,
+      webSite,
+      loginType,
+      email,
+      articleLikeSet,
+      commentLikeSet,
+      talkLikeSet,
+      blogInfo,
+      isLoggedIn,
+      login,
+      logout,
+      saveLoginUrl,
+      saveEmail,
+      updateUserInfo,
+      updateAvatar,
+      checkBlogInfo,
+      closeModel,
+      articleLike,
+      commentLike,
+      talkLike,
+    };
   },
-  actions: {},
-  modules: {},
-  plugins: [
-    createPersistedState({
-      storage: window.sessionStorage
-    })
-  ]
-});
+  {
+    persist: {
+      storage: sessionStorage,
+    },
+  }
+);

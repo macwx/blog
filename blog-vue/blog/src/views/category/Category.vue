@@ -23,37 +23,38 @@
   </div>
 </template>
 
-<script>
-export default {
-  created() {
-    this.listCategories();
-  },
-  data: function() {
-    return {
-      categoryList: [],
-      count: 0
-    };
-  },
-  methods: {
-    listCategories() {
-      this.axios.get("/api/categories").then(({ data }) => {
-        this.categoryList = data.data.recordList;
-        this.count = data.data.count;
-      });
+<script setup>
+import { ref, computed } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+
+const store = useBlogStore();
+
+// Refs
+const categoryList = ref([]);
+const count = ref(0);
+
+// Computed
+const cover = computed(() => {
+  var coverUrl = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "category") {
+      coverUrl = item.pageCover;
     }
-  },
-  computed: {
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "category") {
-          cover = item.pageCover;
-        }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    }
-  }
-};
+  });
+  return "background: url(" + coverUrl + ") center center / cover no-repeat";
+});
+
+// Methods
+function listCategories() {
+  axios.get("/api/categories").then(({ data }) => {
+    categoryList.value = data.data.recordList;
+    count.value = data.data.count;
+  });
+}
+
+// Lifecycle
+listCategories();
 </script>
 
 <style scoped>

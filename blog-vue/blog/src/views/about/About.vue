@@ -14,7 +14,7 @@
       </div>
       <!-- 介绍 -->
       <div
-        ref="about"
+        ref="aboutRef"
         class="about-content markdown-body"
         v-html="aboutContent"
       />
@@ -22,67 +22,73 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import Clipboard from "clipboard";
 import markdownToHtml from "../../utils/markdown";
-export default {
-  created() {
-    this.getAboutContent();
-  },
-  destroyed() {
-    this.clipboard.destroy();
-  },
-  data: function() {
-    return {
-      aboutContent: "",
-      clipboard: null,
-      imgList: []
-    };
-  },
-  methods: {
-    getAboutContent() {
-      const that = this;
-      this.axios.get("/api/about").then(({ data }) => {
-        this.aboutContent = markdownToHtml(data.data);
-        this.$nextTick(() => {
-          // 添加代码复制功能
-          this.clipboard = new Clipboard(".copy-btn");
-          this.clipboard.on("success", () => {
-            this.$toast({ type: "success", message: "复制成功" });
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
+
+const store = useBlogStore();
+const toast = useToast();
+
+const aboutRef = ref(null);
+const aboutContent = ref("");
+let clipboard = null;
+const imgList = ref([]);
+
+function getAboutContent() {
+  axios.get("/api/about").then(({ data }) => {
+    aboutContent.value = markdownToHtml(data.data);
+    nextTick(() => {
+      // 添加代码复制功能
+      clipboard = new Clipboard(".copy-btn");
+      clipboard.on("success", () => {
+        toast({ type: "success", message: "复制成功" });
+      });
+      // 添加图片预览功能
+      if (aboutRef.value) {
+        const imgs = aboutRef.value.getElementsByTagName("img");
+        for (var i = 0; i < imgs.length; i++) {
+          imgList.value.push(imgs[i].src);
+          imgs[i].addEventListener("click", function(e) {
+            previewImg(e.target.currentSrc);
           });
-          // 添加图片预览功能
-          const imgList = this.$refs.about.getElementsByTagName("img");
-          for (var i = 0; i < imgList.length; i++) {
-            this.imgList.push(imgList[i].src);
-            imgList[i].addEventListener("click", function(e) {
-              that.previewImg(e.target.currentSrc);
-            });
-          }
-        });
-      });
-    },
-    previewImg(img) {
-      this.$imagePreview({
-        images: this.imgList,
-        index: this.imgList.indexOf(img)
-      });
-    }
-  },
-  computed: {
-    avatar() {
-      return this.$store.state.blogInfo.websiteConfig.websiteAvatar;
-    },
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "about") {
-          cover = item.pageCover;
         }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
+      }
+    });
+  });
+}
+
+function previewImg(img) {
+  // TODO: Vue3 migration - $imagePreview removed, use basic preview
+  window.open(img, "_blank");
+}
+
+const avatar = computed(() => {
+  return store.blogInfo.websiteConfig.websiteAvatar;
+});
+
+const cover = computed(() => {
+  var c = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "about") {
+      c = item.pageCover;
     }
+  });
+  return "background: url(" + c + ") center center / cover no-repeat";
+});
+
+onMounted(() => {
+  getAboutContent();
+});
+
+onUnmounted(() => {
+  if (clipboard) {
+    clipboard.destroy();
   }
-};
+});
 </script>
 
 <style scoped>

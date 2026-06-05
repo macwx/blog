@@ -21,35 +21,34 @@
   </div>
 </template>
 
-<script>
-export default {
-  created() {
-    this.listPhotoAlbums();
-  },
-  data: function() {
-    return {
-      photoAlbumList: []
-    };
-  },
-  methods: {
-    listPhotoAlbums() {
-      this.axios.get("/api/photos/albums").then(({ data }) => {
-        this.photoAlbumList = data.data;
-      });
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+
+const store = useBlogStore();
+
+const photoAlbumList = ref([]);
+
+function listPhotoAlbums() {
+  axios.get("/api/photos/albums").then(({ data }) => {
+    photoAlbumList.value = data.data;
+  });
+}
+
+const cover = computed(() => {
+  var c = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "album") {
+      c = item.pageCover;
     }
-  },
-  computed: {
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "album") {
-          cover = item.pageCover;
-        }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    }
-  }
-};
+  });
+  return "background: url(" + c + ") center center / cover no-repeat";
+});
+
+onMounted(() => {
+  listPhotoAlbums();
+});
 </script>
 
 <style scoped>

@@ -1,120 +1,94 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
-
-Vue.use(VueRouter);
+import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   {
     path: "/",
-    component: resolve => require(["../views/home/Home.vue"], resolve)
+    component: () => import("../views/home/Home.vue"),
   },
   {
     path: "/articles/:articleId",
-    component: resolve => require(["../views/article/Article.vue"], resolve)
+    component: () => import("../views/article/Article.vue"),
   },
   {
     path: "/archives",
-    component: resolve => require(["../views/archive/Archive.vue"], resolve),
-    meta: {
-      title: "归档"
-    }
+    component: () => import("../views/archive/Archive.vue"),
+    meta: { title: "归档" },
   },
   {
     path: "/albums",
-    component: resolve => require(["../views/album/Album.vue"], resolve),
-    meta: {
-      title: "相册"
-    }
+    component: () => import("../views/album/Album.vue"),
+    meta: { title: "相册" },
   },
   {
     path: "/talks",
-    component: resolve => require(["../views/talk/Talk.vue"], resolve),
-    meta: {
-      title: "说说"
-    }
+    component: () => import("../views/talk/Talk.vue"),
+    meta: { title: "说说" },
   },
   {
     path: "/talks/:talkId",
-    component: resolve => require(["../views/talk/TalkInfo.vue"], resolve),
-    meta: {
-      title: "说说"
-    }
+    component: () => import("../views/talk/TalkInfo.vue"),
+    meta: { title: "说说" },
   },
   {
     path: "/albums/:albumId",
-    component: resolve => require(["../views/album/Photo.vue"], resolve)
+    component: () => import("../views/album/Photo.vue"),
   },
   {
     path: "/tags",
-    component: resolve => require(["../views/tag/Tag.vue"], resolve),
-    meta: {
-      title: "标签"
-    }
+    component: () => import("../views/tag/Tag.vue"),
+    meta: { title: "标签" },
   },
   {
     path: "/categories",
-    component: resolve => require(["../views/category/Category.vue"], resolve),
-    meta: {
-      title: "分类"
-    }
+    component: () => import("../views/category/Category.vue"),
+    meta: { title: "分类" },
   },
   {
     path: "/categories/:categoryId",
-    component: resolve => require(["../views/article/ArticleList.vue"], resolve)
+    component: () => import("../views/article/ArticleList.vue"),
   },
   {
     path: "/tags/:tagId",
-    component: resolve => require(["../views/article/ArticleList.vue"], resolve)
+    component: () => import("../views/article/ArticleList.vue"),
   },
   {
     path: "/links",
-    component: resolve => require(["../views/link/Link.vue"], resolve),
-    meta: {
-      title: "友链列表"
-    }
+    component: () => import("../views/link/Link.vue"),
+    meta: { title: "友链列表" },
   },
   {
     path: "/about",
-    component: resolve => require(["../views/about/About.vue"], resolve),
-    meta: {
-      title: "关于我"
-    }
+    component: () => import("../views/about/About.vue"),
+    meta: { title: "关于我" },
   },
   {
     path: "/message",
-    component: resolve => require(["../views/message/Message.vue"], resolve),
-    meta: {
-      title: "留言板"
-    }
+    component: () => import("../views/message/Message.vue"),
+    meta: { title: "留言板" },
   },
   {
     path: "/clawdchat",
-    component: resolve => require(["../views/clawdchat/ClawdChat.vue"], resolve),
-    meta: {
-      title: "社区动态"
-    }
+    component: () => import("../views/clawdchat/ClawdChat.vue"),
+    meta: { title: "社区动态" },
   },
   {
     path: "/user",
-    component: resolve => require(["../views/user/User.vue"], resolve),
-    meta: {
-      title: "个人中心"
-    }
+    component: () => import("../views/user/User.vue"),
+    meta: { title: "个人中心" },
   },
   {
     path: "/oauth/login/qq",
-    component: resolve => require(["../components/OauthLogin.vue"], resolve)
+    component: () => import("../components/OauthLogin.vue"),
   },
   {
     path: "/oauth/login/weibo",
-    component: resolve => require(["../components/OauthLogin.vue"], resolve)
-  }
+    component: () => import("../components/OauthLogin.vue"),
+  },
 ];
 
-const router = new VueRouter({
-  mode: "history",
-  base: process.env.BASE_URL,
-  routes
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
 });
 
 export default router;

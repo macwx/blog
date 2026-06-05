@@ -1,17 +1,18 @@
 <template>
-  <div id="floating-image">
+  <div id="floating-image" ref="floatingImage">
     <img src="https://macwoss.oss-cn-beijing.aliyuncs.com/config/83c25cbf0399ab91f569d6fa13af6662.png" alt="Floating Image" id="floating-img" />
     <span id="close-btn" @click="closeImage">❌</span>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'FloatingImage',
-  methods: {
-    closeImage() {
-      this.$el.style.display = 'none';
-    }
+<script setup>
+import { ref } from "vue";
+
+const floatingImage = ref(null);
+
+function closeImage() {
+  if (floatingImage.value) {
+    floatingImage.value.style.display = "none";
   }
 }
 </script>

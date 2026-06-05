@@ -1,5 +1,5 @@
 <template>
-  <div class="reply-input-wrapper" style="display: none" ref="reply">
+  <div class="reply-input-wrapper" style="display: none" ref="replyRef">
     <textarea
       class="comment-textarea"
       :placeholder="'回复 @' + nickname + '：'"
@@ -28,82 +28,99 @@
   </div>
 </template>
 
-<script>
-import Emoji from "./Emoji";
+<script setup>
+import { ref } from "vue";
+import { useRoute } from "vue-router";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
+import Emoji from "./Emoji.vue";
 import EmojiList from "../assets/js/emoji";
-export default {
-  components: {
-    Emoji
-  },
-  props: {
-    type: {
-      type: Number
-    }
-  },
-  data: function() {
-    return {
-      index: 0,
-      chooseEmoji: false,
-      nickname: "",
-      replyUserId: null,
-      parentId: null,
-      commentContent: ""
-    };
-  },
-  methods: {
-    cancleReply() {
-      this.$refs.reply.style.display = "none";
-    },
-    insertReply() {
-      //判断登录
-      if (!this.$store.state.userId) {
-        this.$store.state.loginFlag = true;
-        return false;
-      }
-      if (this.commentContent.trim() == "") {
-        this.$toast({ type: "error", message: "回复不能为空" });
-        return false;
-      }
-      //解析表情
-      var reg = /\[.+?\]/g;
-      this.commentContent = this.commentContent.replace(reg, function(str) {
-        return (
-          "<img src= '" +
-          EmojiList[str] +
-          "' width='24'height='24' style='margin: 0 1px;vertical-align: text-bottom'/>"
-        );
-      });
-      const path = this.$route.path;
-      const arr = path.split("/");
-      var comment = {
-        type: this.type,
-        replyUserId: this.replyUserId,
-        parentId: this.parentId,
-        commentContent: this.commentContent
-      };
-      switch (this.type) {
-        case 1:
-        case 3:
-          comment.topicId = arr[2];
-          break;
-        default:
-          break;
-      }
-      this.commentContent = "";
-      this.axios.post("/api/comments", comment).then(({ data }) => {
-        if (data.flag) {
-          this.$emit("reloadReply", this.index);
-          this.$toast({ type: "success", message: "回复成功" });
-        } else {
-          this.$toast({ type: "error", message: data.message });
-        }
-      });
-    },
-    addEmoji(text) {
-      this.commentContent += text;
-    }
+
+const store = useBlogStore();
+const route = useRoute();
+const toast = useToast();
+
+const props = defineProps({
+  type: {
+    type: Number
   }
-};
+});
+
+const emit = defineEmits(["reloadReply"]);
+
+const replyRef = ref(null);
+const index = ref(0);
+const chooseEmoji = ref(false);
+const nickname = ref("");
+const replyUserId = ref(null);
+const parentId = ref(null);
+const commentContent = ref("");
+
+function cancleReply() {
+  if (replyRef.value) {
+    replyRef.value.style.display = "none";
+  }
+}
+
+function insertReply() {
+  if (!store.userId) {
+    store.loginFlag = true;
+    return false;
+  }
+  if (commentContent.value.trim() == "") {
+    toast({ type: "error", message: "回复不能为空" });
+    return false;
+  }
+  var reg = /\[.+?\]/g;
+  commentContent.value = commentContent.value.replace(reg, function(str) {
+    return (
+      "<img src= '" +
+      EmojiList[str] +
+      "' width='24'height='24' style='margin: 0 1px;vertical-align: text-bottom'/>"
+    );
+  });
+  const path = route.path;
+  const arr = path.split("/");
+  var comment = {
+    type: props.type,
+    replyUserId: replyUserId.value,
+    parentId: parentId.value,
+    commentContent: commentContent.value
+  };
+  switch (props.type) {
+    case 1:
+    case 3:
+      comment.topicId = arr[2];
+      break;
+    default:
+      break;
+  }
+  commentContent.value = "";
+  axios.post("/api/comments", comment).then(({ data }) => {
+    if (data.flag) {
+      emit("reloadReply", index.value);
+      toast({ type: "success", message: "回复成功" });
+    } else {
+      toast({ type: "error", message: data.message });
+    }
+  });
+}
+
+function addEmoji(text) {
+  commentContent.value += text;
+}
+
+// Expose properties for parent component to set
+defineExpose({
+  replyRef,
+  commentContent,
+  nickname,
+  replyUserId,
+  parentId,
+  chooseEmoji,
+  index
+});
 </script>
 
 <style scoped>

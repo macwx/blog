@@ -1,10 +1,10 @@
 <template>
-  <v-footer app padless absolute v-if="!this.isMessage">
+  <v-footer app padless absolute v-if="!isMessage">
     <div class="footer-wrap">
       <div>{{ english }}</div>
       <div>{{ chinese }}</div>
       <div>
-        ©{{ blogInfo.websiteConfig.websiteCreateTime | year }} -
+        ©{{ $filters.year(blogInfo.websiteConfig.websiteCreateTime) }} -
         {{ new Date().getFullYear() }} By
         {{ blogInfo.websiteConfig.websiteAuthor }}
 
@@ -17,27 +17,23 @@
   </v-footer>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { useBlogStore } from "@/store";
 
-export default {
-  data: function() {
-    return {
-      chinese: "",
-      english: ""
-    };
-  },
-  mounted: function() {
-    // 每日一句已关闭（api.vvhan.com 不可用）
-  },
-  computed: {
-    isMessage() {
-      return this.$route.path === "/message";
-    },
-    blogInfo() {
-      return this.$store.state.blogInfo;
-    }
-  }
-};
+const store = useBlogStore();
+const route = useRoute();
+
+const chinese = ref("");
+const english = ref("");
+
+const isMessage = computed(() => route.path === "/message");
+const blogInfo = computed(() => store.blogInfo);
+
+onMounted(() => {
+  // 每日一句已关闭（api.vvhan.com 不可用）
+});
 </script>
 
 <style scoped>

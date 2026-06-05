@@ -30,7 +30,7 @@
               <div style="margin-top:0.375rem">
                 <!-- 发表时间 -->
                 <v-icon size="20">mdi-clock-outline</v-icon>
-                {{ item.createTime | date }}
+                {{ $filters.date(item.createTime) }}
                 <!-- 文章分类 -->
                 <router-link
                   :to="'/categories/' + item.categoryId"
@@ -56,71 +56,83 @@
           </v-card>
         </v-col>
       </v-row>
-      <!-- 无限加载 -->
-      <infinite-loading @infinite="infiniteHandler">
-        <div slot="no-results" />
-        <div slot="no-more" />
-      </infinite-loading>
+      <!-- TODO: Vue3 migration - removed vue-infinite-loading dependency -->
+      <!-- Load more button replacing infinite-loading -->
+      <div v-if="hasMore" class="text-center mt-4">
+        <v-btn color="#49b1f5" variant="outlined" @click="loadMore" :loading="loading">
+          加载更多
+        </v-btn>
+      </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  created() {
-    const path = this.$route.path;
-    if (path.indexOf("/categories") != -1) {
-      this.title = "分类";
-    } else {
-      this.title = "标签";
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+
+const store = useBlogStore();
+const route = useRoute();
+
+// Refs
+const current = ref(1);
+const articleList = ref([]);
+const name = ref("");
+const title = ref("");
+const hasMore = ref(true);
+const loading = ref(false);
+
+// Computed
+const cover = computed(() => {
+  var coverUrl = "";
+  store.blogInfo.pageList.forEach(item => {
+    if (item.pageLabel == "articleList") {
+      coverUrl = item.pageCover;
     }
-  },
-  data: function() {
-    return {
-      current: 1,
-      size: 10,
-      articleList: [],
-      name: "",
-      title: ""
-    };
-  },
-  methods: {
-    infiniteHandler($state) {
-      this.axios
-        .get("/api/articles/condition", {
-          params: {
-            categoryId: this.$route.params.categoryId,
-            tagId: this.$route.params.tagId,
-            current: this.current
-          }
-        })
-        .then(({ data }) => {
-          if (data.data.name) {
-            this.name = data.data.name;
-            document.title = this.title + " - " + this.name;
-          }
-          if (data.data.articlePreviewDTOList.length) {
-            this.current++;
-            this.articleList.push(...data.data.articlePreviewDTOList);
-            $state.loaded();
-          } else {
-            $state.complete();
-          }
-        });
-    }
-  },
-  computed: {
-    cover() {
-      var cover = "";
-      this.$store.state.blogInfo.pageList.forEach(item => {
-        if (item.pageLabel == "articleList") {
-          cover = item.pageCover;
-        }
-      });
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    }
+  });
+  return "background: url(" + coverUrl + ") center center / cover no-repeat";
+});
+
+// Methods
+function loadMore() {
+  loading.value = true;
+  axios
+    .get("/api/articles/condition", {
+      params: {
+        categoryId: route.params.categoryId,
+        tagId: route.params.tagId,
+        current: current.value
+      }
+    })
+    .then(({ data }) => {
+      if (data.data.name) {
+        name.value = data.data.name;
+        document.title = title.value + " - " + name.value;
+      }
+      if (data.data.articlePreviewDTOList.length) {
+        current.value++;
+        articleList.value.push(...data.data.articlePreviewDTOList);
+        loading.value = false;
+      } else {
+        hasMore.value = false;
+        loading.value = false;
+      }
+    });
+}
+
+// Lifecycle
+onMounted(() => {
+  const path = route.path;
+  if (path.indexOf("/categories") != -1) {
+    title.value = "分类";
+  } else {
+    title.value = "标签";
   }
-};
+  // Initial load
+  loadMore();
+});
 </script>
 
 <style scoped>

@@ -10,72 +10,78 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /* eslint-disable no-undef */
-export default {
-  created() {
-    const that = this;
-    //关闭登录框
-    that.$store.state.loginFlag = false;
-    //通过路径判断是微博登录还是qq登录
-    if (that.$route.path == "/oauth/login/qq") {
-      // 拿到openId，accessToken传入后台
-      if (QC.Login.check()) {
-        QC.Login.getMe(function(openId, accessToken) {
-          that.axios
-            .post("/api/users/oauth/qq", {
-              openId: openId,
-              accessToken: accessToken
-            })
-            .then(({ data }) => {
-              if (data.flag) {
-                //保存登录状态
-                that.$store.commit("login", data.data);
-                if (data.data.email == null) {
-                  that.$toast({
-                    type: "warnning",
-                    message: "请绑定邮箱以便及时收到回复"
-                  });
-                } else {
-                  that.$toast({ type: "success", message: data.message });
-                }
+import { onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+import { useToast } from "@/components/toast/useToast";
+
+const store = useBlogStore();
+const router = useRouter();
+const route = useRoute();
+const toast = useToast();
+
+onMounted(() => {
+  //关闭登录框
+  store.loginFlag = false;
+  //通过路径判断是微博登录还是qq登录
+  if (route.path == "/oauth/login/qq") {
+    // 拿到openId，accessToken传入后台
+    if (QC.Login.check()) {
+      QC.Login.getMe(function(openId, accessToken) {
+        axios
+          .post("/api/users/oauth/qq", {
+            openId: openId,
+            accessToken: accessToken
+          })
+          .then(({ data }) => {
+            if (data.flag) {
+              store.login(data.data);
+              if (data.data.email == null) {
+                toast({
+                  type: "warnning",
+                  message: "请绑定邮箱以便及时收到回复"
+                });
               } else {
-                that.$toast({ type: "error", message: data.message });
+                toast({ type: "success", message: data.message });
               }
-            });
-        });
-      } else {
-        that.$toast({ type: "error", message: data.message });
-      }
-    } else {
-      that.axios
-        .post("/api/users/oauth/weibo", { code: this.$route.query.code })
-        .then(({ data }) => {
-          if (data.flag) {
-            //保存登录状态
-            that.$store.commit("login", data.data);
-            if (data.data.email == null) {
-              that.$toast({
-                type: "warnning",
-                message: "请绑定邮箱以便及时收到回复"
-              });
             } else {
-              that.$toast({ type: "success", message: data.message });
+              toast({ type: "error", message: data.message });
             }
-          } else {
-            that.$toast({ type: "error", message: data.message });
-          }
-        });
-    }
-    // 跳转回原页面
-    const loginUrl = that.$store.state.loginUrl;
-    if (loginUrl != null && loginUrl != "") {
-      that.$router.push({ path: loginUrl });
+          });
+      });
     } else {
-      that.$router.push({ path: "/" });
+      toast({ type: "error", message: "QQ登录验证失败" });
     }
+  } else {
+    axios
+      .post("/api/users/oauth/weibo", { code: route.query.code })
+      .then(({ data }) => {
+        if (data.flag) {
+          store.login(data.data);
+          if (data.data.email == null) {
+            toast({
+              type: "warnning",
+              message: "请绑定邮箱以便及时收到回复"
+            });
+          } else {
+            toast({ type: "success", message: data.message });
+          }
+        } else {
+          toast({ type: "error", message: data.message });
+        }
+      });
   }
-};
+  // 跳转回原页面
+  const loginUrl = store.loginUrl;
+  if (loginUrl != null && loginUrl != "") {
+    router.push({ path: loginUrl });
+  } else {
+    router.push({ path: "/" });
+  }
+});
 </script>
 
 <style scoped>

@@ -10,54 +10,54 @@
   </div>
 </template>
 
-<script>
-export default {
-  mounted() {
-    window.addEventListener("scroll", this.scrollToTop);
-  },
-  destroyed() {
-    window.removeEventListener("scroll", this.scrollToTop);
-  },
-  data: function() {
-    return {
-      isShow: "",
-      isOut: "rightside-out",
-      icon: "iconyueliang"
-    };
-  },
-  methods: {
-    // 回到顶部方法
-    backTop() {
-      window.scrollTo({
-        behavior: "smooth",
-        top: 0
-      });
-    },
-    // 为了计算距离顶部的高度，当高度大于100显示回顶部图标，小于100则隐藏
-    scrollToTop() {
-      const that = this;
-      let scrollTop =
-        window.pageYOffset ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop;
-      that.scrollTop = scrollTop;
-      if (that.scrollTop > 20) {
-        that.isShow = "opacity: 1;transform: translateX(-38px);";
-      } else {
-        that.isShow = "";
-      }
-    },
-    show() {
-      const flag = this.isOut == "rightside-out";
-      this.isOut = flag ? "rightside-in" : "rightside-out";
-    },
-    check() {
-      const flag = this.icon == "iconyueliang";
-      this.icon = flag ? "icontaiyang" : "iconyueliang";
-      this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
-    }
+<script setup>
+import { ref, onMounted, onUnmounted } from "vue";
+import { useTheme } from "vuetify";
+
+const theme = useTheme();
+
+const isShow = ref("");
+const isOut = ref("rightside-out");
+const icon = ref("iconyueliang");
+
+function backTop() {
+  window.scrollTo({
+    behavior: "smooth",
+    top: 0
+  });
+}
+
+function scrollToTop() {
+  let scrollTop =
+    window.pageYOffset ||
+    document.documentElement.scrollTop ||
+    document.body.scrollTop;
+  if (scrollTop > 20) {
+    isShow.value = "opacity: 1;transform: translateX(-38px);";
+  } else {
+    isShow.value = "";
   }
-};
+}
+
+function show() {
+  const flag = isOut.value === "rightside-out";
+  isOut.value = flag ? "rightside-in" : "rightside-out";
+}
+
+function check() {
+  const flag = icon.value === "iconyueliang";
+  icon.value = flag ? "icontaiyang" : "iconyueliang";
+  theme.global.name.value =
+    theme.global.name.value === "light" ? "dark" : "light";
+}
+
+onMounted(() => {
+  window.addEventListener("scroll", scrollToTop);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", scrollToTop);
+});
 </script>
 
 <style scoped>

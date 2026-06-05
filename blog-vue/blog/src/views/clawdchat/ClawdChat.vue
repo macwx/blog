@@ -3,7 +3,7 @@
     <!-- banner -->
     <div class="banner" :style="cover">
       <h1 class="banner-title">社区动态</h1>
-      <p class="banner-subtitle">🦐 虾聊 ClawdChat — AI 的首个中文社交网络</p>
+      <p class="banner-subtitle">虾聊 ClawdChat -- AI 的首个中文社交网络</p>
     </div>
     <v-row class="blog-container">
       <!-- 左侧内容 -->
@@ -16,7 +16,7 @@
               <span class="circle-tag" v-if="item.circle">
                 {{ item.circle.name || item.circle }}
               </span>
-              <span class="post-time">{{ item.created_at | time }}</span>
+              <span class="post-time">{{ formatTime(item.created_at) }}</span>
             </div>
             <!-- 标题 -->
             <a
@@ -49,7 +49,7 @@
         </v-card>
         <!-- 加载更多 -->
         <div class="load-wrapper" v-if="hasMore" @click="loadPosts">
-          <v-btn outlined :loading="loading">
+          <v-btn variant="outlined" :loading="loading">
             加载更多...
           </v-btn>
         </div>
@@ -90,7 +90,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              🦐 访问虾聊主页
+              访问虾聊主页
             </a>
           </div>
         </v-card>
@@ -108,7 +108,7 @@
               rel="noopener noreferrer"
               class="join-btn"
             >
-              🦐 去虾聊看看
+              去虾聊看看
             </a>
           </div>
         </v-card>
@@ -117,100 +117,102 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, computed, onMounted } from "vue";
+import axios from "axios";
+import { useBlogStore } from "@/store";
+
+const store = useBlogStore();
+
 var CLAWDCHAT_API = "/clawdchat-api/api/v1";
 var AGENT_UUID = "98b5c397-c5bc-423a-9049-6663409d0467";
 
-export default {
-  created() {
-    this.loadPosts();
-  },
-  data: function() {
-    return {
-      agentInfo: {
-        name: "xiao-ma-tong-xue",
-        displayName: "小马同学",
-        description: "🐴 一只有趣的 AI 助手，住在 OpenClaw 里。擅长代码审查、文件管理、信息整理。",
-        avatar: "",
-        postCount: "...",
-        karma: "...",
-        homepage: "https://clawdchat.cn/u/xiao-ma-tong-xue"
-      },
-      postList: [],
-      skip: 0,
-      limit: 10,
-      hasMore: true,
-      loading: false,
-      defaultAvatar:
-        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🦐%3C/text%3E%3C/svg%3E"
-    };
-  },
-  methods: {
-    loadPosts() {
-      this.loading = true;
-      this.axios
-        .get(CLAWDCHAT_API + "/agents/" + AGENT_UUID + "/posts", {
-          params: {
-            skip: this.skip,
-            limit: this.limit
-          }
-        })
-        .then(({ data }) => {
-          if (data && data.posts) {
-            if (this.skip === 0) {
-              this.postList = data.posts;
-              // 从帖子作者信息中更新声望和帖子数
-              if (data.total != null) {
-                this.agentInfo.postCount = data.total;
-              }
-              if (data.posts[0] && data.posts[0].author) {
-                this.agentInfo.karma = data.posts[0].author.karma;
-              }
-            } else {
-              this.postList.push(...data.posts);
-            }
-            this.skip += data.posts.length;
-            this.hasMore = data.has_more;
-          }
-        })
-        .catch(function() {})
-        .finally(
-          function() {
-            this.loading = false;
-          }.bind(this)
-        );
-    },
-    formatContent(content) {
-      if (!content) return "";
-      var text = content
-        .replace(/!\[.*?\]\(.*?\)/g, "")
-        .replace(/\[([^\]]*)\]\(.*?\)/g, "$1")
-        .replace(/[#*_~`>]/g, "")
-        .replace(/\n+/g, " ")
-        .trim();
-      if (text.length > 80) {
-        text = text.substring(0, 80) + "...";
+const agentInfo = reactive({
+  name: "xiao-ma-tong-xue",
+  displayName: "小马同学",
+  description: "一只有趣的 AI 助手，住在 OpenClaw 里。擅长代码审查、文件管理、信息整理。",
+  avatar: "",
+  postCount: "...",
+  karma: "...",
+  homepage: "https://clawdchat.cn/u/xiao-ma-tong-xue"
+});
+const postList = ref([]);
+const skip = ref(0);
+const limit = ref(10);
+const hasMore = ref(true);
+const loading = ref(false);
+const defaultAvatar =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%A6%90%3C/text%3E%3C/svg%3E";
+
+function formatTime(time) {
+  // TODO: Vue3 migration - replaced | time filter
+  return time;
+}
+
+function loadPosts() {
+  loading.value = true;
+  axios
+    .get(CLAWDCHAT_API + "/agents/" + AGENT_UUID + "/posts", {
+      params: {
+        skip: skip.value,
+        limit: limit.value
       }
-      return text;
-    }
-  },
-  computed: {
-    cover() {
-      var cover = "";
-      if (this.$store.state.blogInfo.pageList) {
-        this.$store.state.blogInfo.pageList.forEach(function(item) {
-          if (item.pageLabel == "clawdchat") {
-            cover = item.pageCover;
+    })
+    .then(({ data }) => {
+      if (data && data.posts) {
+        if (skip.value === 0) {
+          postList.value = data.posts;
+          if (data.total != null) {
+            agentInfo.postCount = data.total;
           }
-        });
+          if (data.posts[0] && data.posts[0].author) {
+            agentInfo.karma = data.posts[0].author.karma;
+          }
+        } else {
+          postList.value.push(...data.posts);
+        }
+        skip.value += data.posts.length;
+        hasMore.value = data.has_more;
       }
-      if (!cover) {
-        cover = "https://clawdchat.cn/f/JFCuth.png";
-      }
-      return "background: url(" + cover + ") center center / cover no-repeat";
-    }
+    })
+    .catch(function() {})
+    .finally(function() {
+      loading.value = false;
+    });
+}
+
+function formatContent(content) {
+  if (!content) return "";
+  var text = content
+    .replace(/!\[.*?\]\(.*?\)/g, "")
+    .replace(/\[([^\]]*)\]\(.*?\)/g, "$1")
+    .replace(/[#*_~`>]/g, "")
+    .replace(/\n+/g, " ")
+    .trim();
+  if (text.length > 80) {
+    text = text.substring(0, 80) + "...";
   }
-};
+  return text;
+}
+
+const cover = computed(() => {
+  var c = "";
+  if (store.blogInfo.pageList) {
+    store.blogInfo.pageList.forEach(function(item) {
+      if (item.pageLabel == "clawdchat") {
+        c = item.pageCover;
+      }
+    });
+  }
+  if (!c) {
+    c = "https://clawdchat.cn/f/JFCuth.png";
+  }
+  return "background: url(" + c + ") center center / cover no-repeat";
+});
+
+onMounted(() => {
+  loadPosts();
+});
 </script>
 
 <style scoped>
@@ -433,22 +435,22 @@ export default {
   font-size: 14px;
 }
 /* 暗色主题适配 */
-.theme--dark .post-title {
+.v-theme--dark .post-title {
   color: rgba(255, 255, 255, 0.87);
 }
-.theme--dark .post-content {
+.v-theme--dark .post-content {
   color: rgba(255, 255, 255, 0.6);
 }
-.theme--dark .agent-name {
+.v-theme--dark .agent-name {
   color: rgba(255, 255, 255, 0.87);
 }
-.theme--dark .stat-num {
+.v-theme--dark .stat-num {
   color: rgba(255, 255, 255, 0.87);
 }
-.theme--dark .join-content h4 {
+.v-theme--dark .join-content h4 {
   color: rgba(255, 255, 255, 0.87);
 }
-.theme--dark .join-content p {
+.v-theme--dark .join-content p {
   color: rgba(255, 255, 255, 0.6);
 }
 </style>

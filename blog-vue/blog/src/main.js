@@ -1,59 +1,64 @@
-import Vue from "vue";
+import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
-import store from "./store";
+import { createPinia } from "pinia";
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import vuetify from "./plugins/vuetify";
+import axios from "axios";
+import dayjs from "dayjs";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 import "./assets/css/animate-lite.css";
 import "./assets/css/index.css";
 import "./assets/css/iconfont.css";
 import "./assets/css/markdown.css";
 import "./assets/css/vue-social-share/client.css";
-import config from "./assets/js/config";
-import Share from "vue-social-share";
-import dayjs from "dayjs";
-import { vueBaberrage } from "vue-baberrage";
-import axios from "axios";
-import VueAxios from "vue-axios";
-import InfiniteLoading from "vue-infinite-loading";
-import "highlight.js/styles/atom-one-dark.css";
-import VueImageSwipe from "vue-image-swipe";
-import "vue-image-swipe/dist/vue-image-swipe.css";
+import "highlight.js/styles/atom-one-dark.min.css";
+
+const app = createApp(App);
+
+// Pinia
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+app.use(pinia);
+
+// Router
+app.use(router);
+
+// Vuetify
+app.use(vuetify);
+
+// Global properties
+app.config.globalProperties.$axios = axios;
+app.config.globalProperties.$dayjs = dayjs;
+
+// Global filters as functions (Vue 3 removed filters)
+app.config.globalProperties.$filters = {
+  date(value) {
+    return dayjs(value).format("YYYY-MM-DD");
+  },
+  year(value) {
+    return dayjs(value).format("YYYY");
+  },
+  hour(value) {
+    return dayjs(value).format("HH:mm:ss");
+  },
+  time(value) {
+    return dayjs(value).format("YYYY-MM-DD HH:mm:ss");
+  },
+  num(value) {
+    if (value >= 1000) {
+      return (value / 1000).toFixed(1) + "k";
+    }
+    return value;
+  },
+};
+
+// Toast plugin
 import Toast from "./components/toast/index";
-import NProgress from "nprogress";
-import "nprogress/nprogress.css";
+app.use(Toast);
 
-Vue.prototype.config = config;
-Vue.config.productionTip = false;
-Vue.use(Share);
-Vue.use(vueBaberrage);
-Vue.use(InfiniteLoading);
-Vue.use(VueAxios, axios);
-Vue.use(VueImageSwipe);
-Vue.use(Toast);
-
-Vue.filter("date", function(value) {
-  return dayjs(value).format("YYYY-MM-DD");
-});
-
-Vue.filter("year", function(value) {
-  return dayjs(value).format("YYYY");
-});
-
-Vue.filter("hour", function(value) {
-  return dayjs(value).format("HH:mm:ss");
-});
-
-Vue.filter("time", function(value) {
-  return dayjs(value).format("YYYY-MM-DD HH:mm:ss");
-});
-
-Vue.filter("num", function(value) {
-  if (value >= 1000) {
-    return (value / 1000).toFixed(1) + "k";
-  }
-  return value;
-});
-
+// NProgress
 router.beforeEach((to, from, next) => {
   NProgress.start();
   if (to.meta.title) {
@@ -63,29 +68,20 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach(() => {
-  window.scrollTo({
-    top: 0,
-    behavior: "instant"
-  });
+  window.scrollTo({ top: 0, behavior: "instant" });
   NProgress.done();
 });
 
+// Axios interceptors
 axios.interceptors.response.use(
-  function(response) {
+  (response) => {
     switch (response.data.code) {
       case 50000:
-        Vue.prototype.$toast({ type: "error", message: "系统异常" });
+        app.config.globalProperties.$toast({ type: "error", message: "系统异常" });
     }
     return response;
   },
-  function(error) {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-new Vue({
-  router,
-  store,
-  vuetify,
-  render: h => h(App)
-}).$mount("#app");
+app.mount("#app");

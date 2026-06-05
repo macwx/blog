@@ -11,6 +11,11 @@ ul{
 * {
   font-family: -apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Lato,Roboto,'PingFang SC','Microsoft YaHei',sans-serif !important;
 }
+.v-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .v-navigation-drawer{
   z-index: 20;
 }
@@ -25,11 +30,11 @@ ul{
   transition: all 0.5s;
 }
 
-.v-snack__content {
+.v-snackbar__content {
   justify-content: start;
 }
 
-.theme--light.v-card {
+.v-theme--light.v-card {
   background: #fff;
   color: #4c4948;
   border-radius: 8px;
@@ -37,10 +42,10 @@ ul{
   transition: all 0.3s;
 }
 
-.theme--light.v-card.blog-container{
+.v-theme--light.v-card.blog-container{
   background: #fff !important;
 }
-.theme--light.v-card.article-wrapper {
+.v-theme--light.v-card.article-wrapper {
   background: #fff !important;
 }
 
@@ -48,60 +53,63 @@ ul{
   border-radius: 8px;
 }
 
-.theme--light.v-card:hover {
+.v-theme--light.v-card:hover {
   box-shadow: 0 4px 12px 12px rgba(7, 17, 27, 0.15);
 }
 
-.theme--light.v-app-bar.v-toolbar.v-sheet {
+.v-theme--light.v-toolbar.v-sheet {
   background-color: rgba(0, 0, 0, 0);
 }
 
-.theme--light.v-app-bar.v-toolbar.v-sheet a{
+.v-theme--light.v-toolbar.v-sheet a{
   color: #eee;
 }
-
-.theme--light.v-footer {
+.v-theme--light.v-toolbar.v-sheet.nav-fixed a{
   color: #4c4948;
 }
 
-.theme--light.v-navigation-drawer {
+.v-theme--light.v-footer {
+  color: #4c4948;
+}
+
+.v-theme--light.v-navigation-drawer {
   background: #f6f8fa;
 }
 
-.theme--light.v-application{
+.v-theme--light.v-application{
   background: linear-gradient( 90deg, rgba(247, 149, 51, 0.1) 0, rgba(243, 112, 85, 0.1) 15%, rgba(239, 78, 123, 0.1) 30%, rgba(161, 102, 171, 0.1) 44%, rgba(80, 115, 184, 0.1) 58%, rgba(16, 152, 173, 0.1) 72%, rgba(7, 179, 155, 0.1) 86%, rgba(109, 186, 130, 0.1) 100% );
   color: #4c4948;
 }
 
-.theme--light.v-application a{
+.v-theme--light.v-application a{
   color: #4c4948;
   text-decoration: none;
 }
 
-.theme--light.v-divider {
+.v-theme--light.v-divider {
   border-color: #ccc;
 }
 
-.theme--dark.v-card{
+.v-theme--dark.v-card{
   background: #121212;
   color: rgba(255,255,255,0.8) ;
 }
 
-.theme--dark.v-footer {
+.v-theme--dark.v-footer {
   color: rgba(255,255,255,0.8);
 }
 
-.theme--dark.v-application{
+.v-theme--dark.v-application{
   background: #121212;
   color: rgba(255,255,255,0.8);
 }
 
-.theme--dark.v-application a{
+.v-theme--dark.v-application a{
   color: rgba(255,255,255,0.8);
   text-decoration: none;
 }
 
-.theme--dark.v-navigation-drawer {
+.v-theme--dark.v-navigation-drawer {
   background-color: #121212;
 }
 
