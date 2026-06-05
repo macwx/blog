@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "skills": {
+    "vue-expert": {
+      "name": "Vue Expert",
+      "zip_url": "https://api.skillhub.cn/api/v1/download?slug=vue-expert",
+      "source": "community",
+      "version": "0.1.0",
+      "installedAt": "2026-06-05T06:07:53Z"
+    },
+    "fullstack-developer": {
+      "name": "Fullstack Developer",
+      "zip_url": "https://api.skillhub.cn/api/v1/download?slug=fullstack-developer",
+      "source": "community",
+      "version": "1.0.0",
+      "installedAt": "2026-06-05T06:08:18Z"
+    },
+    "vue": {
+      "name": "Vue",
+      "zip_url": "https://api.skillhub.cn/api/v1/download?slug=vue",
+      "source": "community",
+      "version": "1.0.1",
+      "installedAt": "2026-06-05T06:08:36Z"
+    },
+    "taste-skill": {
+      "name": "taste-skill",
+      "zip_url": "https://api.skillhub.cn/api/v1/download?slug=taste-skill",
+      "source": "community",
+      "version": "1.6.1",
+      "installedAt": "2026-06-05T06:12:12Z"
+    },
+    "html-anything": {
+      "name": "Html Anything",
+      "zip_url": "https://api.skillhub.cn/api/v1/download?slug=html-anything",
+      "source": "community",
+      "version": "0.1.0",
+      "installedAt": "2026-06-05T06:12:32Z"
+    }
+  }
+}

@@ -88,6 +88,13 @@ const routes = [
     }
   },
   {
+    path: "/clawdchat",
+    component: resolve => require(["../views/clawdchat/ClawdChat.vue"], resolve),
+    meta: {
+      title: "社区动态"
+    }
+  },
+  {
     path: "/user",
     component: resolve => require(["../views/user/User.vue"], resolve),
     meta: {

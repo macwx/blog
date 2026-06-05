@@ -51,6 +51,34 @@
         <v-card class="animated zoomIn" v-if="talkList.length > 0">
           <Swiper :list="talkList"/>
         </v-card>
+        <!-- 虾聊社区介绍 -->
+        <router-link to="/clawdchat" class="clawdchat-feature-link animated zoomIn mt-4">
+          <v-card class="clawdchat-feature-card">
+            <div class="clawdchat-feature-left">
+              <img
+                src="https://clawdchat.cn/f/JFCuth.png"
+                class="clawdchat-feature-avatar"
+              />
+            </div>
+            <div class="clawdchat-feature-right">
+              <div class="clawdchat-feature-title">🦐 欢迎来我的虾聊社区</div>
+              <div class="clawdchat-feature-desc">
+                来看看我的龙虾在聊什么？这是 AI 的首个中文社交网络，我的社区动态都会在这里更新。
+              </div>
+              <div class="clawdchat-feature-stats">
+                <span>
+                  <strong>{{ clawdchatPostCount }}</strong>
+                  <small>帖子</small>
+                </span>
+                <span>
+                  <strong>{{ clawdchatKarma }}</strong>
+                  <small>声望</small>
+                </span>
+              </div>
+            </div>
+            <v-icon class="clawdchat-feature-arrow">mdi-chevron-right</v-icon>
+          </v-card>
+        </router-link>
         <v-card
             class="animated zoomIn article-card"
             style="border-radius: 12px 8px 8px 12px"
@@ -202,6 +230,30 @@
               {{ blogInfo.websiteConfig.websiteNotice }}
             </div>
           </v-card>
+          <!-- 虾聊动态 -->
+          <v-card
+            class="blog-card animated zoomIn mt-5 big"
+            v-if="clawdchatPosts.length > 0"
+          >
+            <div class="web-info-title">
+              <v-icon size="18">mdi-chat-processing</v-icon>
+              虾聊动态
+            </div>
+            <div
+              v-for="post in clawdchatPosts"
+              :key="post.id"
+              class="clawdchat-mini-post"
+            >
+              <a
+                :href="'https://clawdchat.cn/posts/' + post.id"
+                target="_blank"
+                class="clawdchat-mini-title"
+              >{{ post.title }}</a>
+            </div>
+            <router-link to="/clawdchat" class="clawdchat-mini-more">
+              查看更多 →
+            </router-link>
+          </v-card>
           <!--关注我们-->
           <v-card class="blog-card animated zoomIn mt-5 big">
             <div class="web-info-title">
@@ -295,6 +347,7 @@ export default {
   created() {
     this.init();
     this.listHomeTalks();
+    this.fetchClawdchatPosts();
     this.timer = setInterval(this.runTime, 1000);
     // this.initMoyuPic();
   },
@@ -315,6 +368,9 @@ export default {
       articleList: [],
       moyuPic: "../../../public/img/wanma.png",
       talkList: [],
+      clawdchatPosts: [],
+      clawdchatPostCount: "-",
+      clawdchatKarma: "-",
       current: 1
     };
   },
@@ -339,6 +395,22 @@ export default {
       //   .then(({hitokoto}) => {
       //     this.initTyped(hitokoto);
       //   });
+    },
+    fetchClawdchatPosts() {
+      this.axios
+        .get(
+          "/clawdchat-api/api/v1/agents/98b5c397-c5bc-423a-9049-6663409d0467/posts?limit=3&skip=0"
+        )
+        .then(({ data }) => {
+          if (data && data.posts) {
+            this.clawdchatPosts = data.posts;
+            this.clawdchatPostCount = data.total || 0;
+            if (data.posts.length > 0 && data.posts[0].author) {
+              this.clawdchatKarma = data.posts[0].author.karma || 0;
+            }
+          }
+        })
+        .catch(() => {});
     },
     listHomeTalks() {
       this.axios.get("/api/home/talks").then(({data}) => {
@@ -504,6 +576,137 @@ export default {
     opacity: 0
   100%
     opacity: 1
+</style>
+
+<style>
+.clawdchat-mini-post {
+  padding: 8px 16px;
+  border-bottom: 1px dashed #f0f0f0;
+}
+.clawdchat-mini-post:last-of-type {
+  border-bottom: none;
+}
+.clawdchat-mini-title {
+  font-size: 14px;
+  color: #555;
+  text-decoration: none;
+  line-height: 1.5;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.clawdchat-mini-title:hover {
+  color: #49b1f5;
+}
+.clawdchat-mini-more {
+  display: block;
+  text-align: center;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #49b1f5;
+  text-decoration: none;
+  border-top: 1px dashed #f0f0f0;
+  transition: color 0.2s;
+}
+.clawdchat-mini-more:hover {
+  color: #ff7242;
+}
+.theme--dark .clawdchat-mini-title {
+  color: rgba(255, 255, 255, 0.7);
+}
+.theme--dark .clawdchat-mini-post {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+.theme--dark .clawdchat-mini-more {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+</style>
+
+<style>
+/* 虾聊社区首页横幅 */
+.clawdchat-feature-link {
+  display: block;
+  text-decoration: none;
+  margin-bottom: 0;
+}
+.clawdchat-feature-card {
+  display: flex;
+  align-items: center;
+  padding: 24px 28px;
+  border-radius: 12px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.clawdchat-feature-card:hover {
+  box-shadow: 0 8px 24px rgba(73, 177, 245, 0.15);
+  transform: translateY(-2px);
+}
+.clawdchat-feature-card:hover .clawdchat-feature-arrow {
+  color: #ff7242;
+}
+.clawdchat-feature-left {
+  flex-shrink: 0;
+  margin-right: 24px;
+}
+.clawdchat-feature-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #49b1f5;
+}
+.clawdchat-feature-right {
+  flex: 1;
+  min-width: 0;
+}
+.clawdchat-feature-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+.clawdchat-feature-desc {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.clawdchat-feature-stats {
+  display: flex;
+  gap: 20px;
+}
+.clawdchat-feature-stats span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.clawdchat-feature-stats strong {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+.clawdchat-feature-stats small {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+}
+.clawdchat-feature-arrow {
+  flex-shrink: 0;
+  font-size: 28px;
+  color: #49b1f5;
+  transition: color 0.3s;
+}
+.theme--dark .clawdchat-feature-title {
+  color: rgba(255, 255, 255, 0.87);
+}
+.theme--dark .clawdchat-feature-desc {
+  color: rgba(255, 255, 255, 0.6);
+}
+.theme--dark .clawdchat-feature-stats strong {
+  color: rgba(255, 255, 255, 0.87);
+}
 </style>
 
 <style scoped>
@@ -680,10 +883,7 @@ export default {
   -webkit-box-orient: vertical;
 }
 
-.blog-wrapper {
-  position: sticky;
-  top: 10px;
-}
+/* position: sticky removed - sidebar now scrolls normally */
 
 .guanzhu {
   margin-top: 10px;

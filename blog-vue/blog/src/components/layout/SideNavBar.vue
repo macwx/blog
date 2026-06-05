@@ -88,6 +88,11 @@
           <i class="iconfont iconpinglunzu" /> 留言
         </router-link>
       </div>
+      <div class="menus-item">
+        <router-link to="/clawdchat">
+          <i class="iconfont iconfaxian" /> 社区
+        </router-link>
+      </div>
       <div class="menus-item" v-if="!this.$store.state.avatar">
         <a @click="openLogin"><i class="iconfont icondenglu" /> 登录 </a>
       </div>

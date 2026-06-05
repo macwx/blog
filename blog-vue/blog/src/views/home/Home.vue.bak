@@ -1,0 +1,616 @@
+<template>
+  <div>
+    <!-- banner -->
+    <div class="home-banner" :style="cover">
+      <div class="banner-container">
+        <!-- 联系方式 -->
+        <h1 class="blog-title animated zoomIn">
+          {{ blogInfo.websiteConfig.websiteName }}
+        </h1>
+        <!-- 一言 -->
+        <div class="blog-intro">
+          {{ obj.output }} <span class="typed-cursor">|</span>
+        </div>
+        <!-- 联系方式 -->
+        <div class="blog-contact">
+          <a
+              v-if="isShowSocial('qq')"
+              class="mr-5 iconfont iconqq"
+              target="_blank"
+              :href="
+              'http://wpa.qq.com/msgrd?v=3&uin=' +
+                blogInfo.websiteConfig.qq +
+                '&site=qq&menu=yes'
+            "
+          />
+          <a
+              v-if="isShowSocial('github')"
+              target="_blank"
+              :href="blogInfo.websiteConfig.github"
+              class="mr-5 iconfont icongithub"
+          />
+          <a
+              v-if="isShowSocial('gitee')"
+              target="_blank"
+              :href="blogInfo.websiteConfig.gitee"
+              class="iconfont icongitee-fill-round"
+          />
+        </div>
+      </div>
+      <!-- 向下滚动 -->
+      <div class="scroll-down" @click="scrollDown">
+        <v-icon color="#fff" class="scroll-down-effects">
+          mdi-chevron-down
+        </v-icon>
+      </div>
+    </div>
+    <!-- 主页文章 -->
+    <v-row class="home-container">
+      <v-col md="9" cols="12">
+        <!-- 说说轮播 -->
+        <v-card class="animated zoomIn" v-if="talkList.length > 0">
+          <Swiper :list="talkList"/>
+        </v-card>
+        <v-card
+            class="animated zoomIn article-card"
+            style="border-radius: 12px 8px 8px 12px"
+            v-for="(item, index) of articleList"
+            :key="item.id"
+        >
+          <!-- 文章封面图 -->
+          <div :class="isRight(index)">
+            <router-link :to="'/articles/' + item.id">
+              <v-img
+                  class="on-hover"
+                  width="100%"
+                  height="100%"
+                  :src="item.articleCover"
+              />
+            </router-link>
+          </div>
+          <!-- 文章信息 -->
+          <div class="article-wrapper">
+            <div style="line-height:1.4">
+              <router-link :to="'/articles/' + item.id">
+                {{ item.articleTitle }}
+              </router-link>
+            </div>
+            <div class="article-info">
+              <!-- 是否置顶 -->
+              <span v-if="item.isTop == 1">
+                <span style="color:#ff7242">
+                  <i class="iconfont iconzhiding"/> 置顶
+                </span>
+                <span class="separator">|</span>
+              </span>
+              <!-- 发表时间 -->
+              <v-icon size="14">mdi-calendar-month-outline</v-icon>
+              {{ item.createTime | date }}
+              <span class="separator">|</span>
+              <!-- 文章分类 -->
+              <router-link :to="'/categories/' + item.categoryId">
+                <v-icon size="14">mdi-inbox-full</v-icon>
+                {{ item.categoryName }}
+              </router-link>
+              <span class="separator">|</span>
+              <!-- 文章标签 -->
+              <router-link
+                  style="display:inline-block"
+                  :to="'/tags/' + tag.id"
+                  class="mr-1"
+                  v-for="tag of item.tagDTOList"
+                  :key="tag.id"
+              >
+                <v-icon size="14">mdi-tag-multiple</v-icon>
+                {{ tag.tagName }}
+              </router-link>
+            </div>
+            <!-- 文章内容 -->
+            <div class="article-content">
+              {{ item.articleContent }}
+            </div>
+          </div>
+        </v-card>
+        <!-- 无限加载 -->
+        <infinite-loading @infinite="infiniteHandler">
+          <div slot="no-more"/>
+        </infinite-loading>
+      </v-col>
+      <!-- 博主信息 -->
+      <v-col md="3" cols="12" class="d-md-block d-none">
+        <div class="blog-wrapper">
+          <v-card class="animated zoomIn blog-card mt-5">
+            <div class="author-wrapper">
+              <!-- 博主头像 -->
+              <v-avatar size="110">
+                <img
+                    class="author-avatar"
+                    :src="blogInfo.websiteConfig.websiteAvatar"
+                />
+              </v-avatar>
+              <div style="font-size: 1.375rem;margin-top:0.625rem">
+                {{ blogInfo.websiteConfig.websiteAuthor }}
+              </div>
+              <div style="font-size: 0.875rem;">
+                {{ blogInfo.websiteConfig.websiteIntro }}
+              </div>
+            </div>
+            <!-- 博客信息 -->
+            <div class="blog-info-wrapper">
+              <div class="blog-info-data">
+                <router-link to="/archives">
+                  <div style="font-size: 0.875rem">文章</div>
+                  <div style="font-size: 1.25rem">
+                    {{ blogInfo.articleCount }}
+                  </div>
+                </router-link>
+              </div>
+              <div class="blog-info-data">
+                <router-link to="/categories">
+                  <div style="font-size: 0.875rem">分类</div>
+                  <div style="font-size: 1.25rem">
+                    {{ blogInfo.categoryCount }}
+                  </div>
+                </router-link>
+              </div>
+              <div class="blog-info-data">
+                <router-link to="/tags">
+                  <div style="font-size: 0.875rem">标签</div>
+                  <div style="font-size: 1.25rem">{{ blogInfo.tagCount }}</div>
+                </router-link>
+              </div>
+            </div>
+            <!-- 收藏按钮 -->
+            <a class="collection-btn" @click="tip = true">
+              <v-icon color="#fff" size="18" class="mr-1">mdi-bookmark</v-icon>
+              加入书签
+            </a>
+            <!-- 社交信息 -->
+            <!--            <div class="card-info-social">-->
+            <!--              <a-->
+            <!--                v-if="isShowSocial('qq')"-->
+            <!--                class="mr-5 iconfont iconqq"-->
+            <!--                target="_blank"-->
+            <!--                :href="-->
+            <!--                  'http://wpa.qq.com/msgrd?v=3&uin=' +-->
+            <!--                    blogInfo.websiteConfig.qq +-->
+            <!--                    '&site=qq&menu=yes'-->
+            <!--                "-->
+            <!--              />-->
+            <!--              <a-->
+            <!--                v-if="isShowSocial('github')"-->
+            <!--                target="_blank"-->
+            <!--                :href="blogInfo.websiteConfig.github"-->
+            <!--                class="mr-5 iconfont icongithub"-->
+            <!--              />-->
+            <!--              <a-->
+            <!--                v-if="isShowSocial('gitee')"-->
+            <!--                target="_blank"-->
+            <!--                :href="blogInfo.websiteConfig.gitee"-->
+            <!--                class="iconfont icongitee-fill-round"-->
+            <!--              />-->
+            <!--            </div>-->
+          </v-card>
+
+          <!-- 公告 -->
+          <v-card class="blog-card animated zoomIn mt-5 big">
+            <div class="web-info-title">
+              <v-icon size="18">mdi-bell</v-icon>
+              公告
+            </div>
+            <div style="font-size:0.875rem">
+              {{ blogInfo.websiteConfig.websiteNotice }}
+            </div>
+          </v-card>
+          <!-- 虾聊动态 -->
+          <v-card class="blog-card animated zoomIn mt-5 clawdchat-sidebar" v-if="clawdchatPosts.length > 0">
+            <div class="clawdchat-sidebar-header">
+              <img src="https://clawdchat.cn/f/JFCuth.png" class="clawdchat-sidebar-logo" />
+              <div>
+                <div class="clawdchat-sidebar-title">虾聊社区</div>
+                <div class="clawdchat-sidebar-sub">AI 的首个中文社交网络</div>
+              </div>
+            </div>
+            <div class="clawdchat-sidebar-divider"></div>
+            <div class="clawdchat-sidebar-posts">
+              <div class="clawdchat-sidebar-post" v-for="post in clawdchatPosts" :key="post.id">
+                <a :href="'https://clawdchat.cn/posts/' + post.id" target="_blank">
+                  {{ post.title }}
+                </a>
+              </div>
+            </div>
+            <router-link to="/clawdchat" class="clawdchat-sidebar-more">
+              探索社区 →
+            </router-link>
+          </v-card>
+          <!--关注我们-->
+          <v-card class="blog-card animated zoomIn mt-5 big">
+            <div class="web-info-title">
+              <v-icon size="18">mdi-account</v-icon>
+              源码地址
+            </div>
+            <div class="guanzhu" id="follow-us" ref="follow">
+              <ul>
+                <li v-if="isShowSocial('gitee')" class="gitee">
+                  <a :href="blogInfo.websiteConfig.gitee" target="_blank">{{
+                      blogInfo.websiteConfig.gitee
+                    }}</a>
+                </li>
+
+                <li v-if="isShowSocial('email')" class="email">
+                  <a href="javascript:void(0);">{{
+                      blogInfo.websiteConfig.email
+                    }}</a>
+                </li>
+                <li v-if="isShowSocial('github')" class="github">
+                  <a :href="blogInfo.websiteConfig.github" target="_blank">{{
+                      blogInfo.websiteConfig.github
+                    }}</a>
+                </li>
+                <li v-if="isShowSocial('qq')" class="qq">
+                  <a
+                      :href="
+                      'tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=' +
+                        blogInfo.websiteConfig.qq
+                    "
+                      target="_blank"
+                  >{{ blogInfo.websiteConfig.qq }}</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </v-card>
+
+          <!--天气-->
+<!--          <v-card class="blog-card animated zoomIn mt-5">-->
+<!--            <div id="he-plugin-standard"></div>-->
+<!--          </v-card>-->
+          <!--标签云已移植到标签页-->
+
+          <!-- 网站信息 -->
+          <v-card class="blog-card animated zoomIn mt-5">
+            <div class="web-info-title">
+              <v-icon size="18">mdi-chart-line</v-icon>
+              网站资讯
+            </div>
+            <div class="web-info">
+              <div style="padding:4px 0 0">
+                网站作者:<span class="float-right">{{ blogInfo.websiteConfig.websiteAuthor }}</span>
+              </div>
+              <div style="padding:4px 0 0">
+                运行时间:<span class="float-right">{{ time }}</span>
+              </div>
+              <div style="padding:4px 0 0">
+                总访问量:<span class="float-right">
+                  {{ blogInfo.viewsCount }}
+                </span>
+              </div>
+            </div>
+          </v-card>
+
+          <!-- 摸鱼日历 -->
+<!--          <v-card class="mt-5" v-click-outside>-->
+<!--            <v-img src="https://macwoss.oss-cn-beijing.aliyuncs.com/config/83c25cbf0399ab91f569d6fa13af6662.png" width="300px" @click="preview()"/>-->
+<!--          </v-card>-->
+        </div>
+      </v-col>
+    </v-row>
+    <!-- 提示消息 -->
+    <v-snackbar v-model="tip" top color="#49b1f5" :timeout="2000">
+      按CTRL+D 键将本页加入书签
+    </v-snackbar>
+  </div>
+</template>
+
+<script>
+import Swiper from "../../components/Swiper.vue";
+import EasyTyper from "easy-typer-js";
+import MarkdownIt from "markdown-it";
+
+const md = new MarkdownIt();
+
+export default {
+  components: {
+    Swiper
+  },
+  created() {
+    this.init();
+    this.listHomeTalks();
+    this.fetchClawdchatPosts();
+    this.timer = setInterval(this.runTime, 1000);
+    // this.initMoyuPic();
+  },
+  data: function () {
+    return {
+      tip: false,
+      time: "",
+      obj: {
+        output: "",
+        isEnd: false,
+        speed: 300,
+        singleBack: false,
+        sleep: 0,
+        type: "rollback",
+        backSpeed: 40,
+        sentencePause: true
+      },
+      articleList: [],
+      moyuPic: "../../../public/img/wanma.png",
+      talkList: [],
+      clawdchatPosts: [],
+      current: 1
+    };
+  },
+
+  methods: {
+    fetchClawdchatPosts() {
+      this.axios.get("/clawdchat-api/api/v1/agents/98b5c397-c5bc-423a-9049-6663409d0467/posts?limit=3&skip=0")
+        .then(({data}) => {
+          if (data && data.posts) {
+            this.clawdchatPosts = data.posts;
+          }
+        }).catch(() => {});
+    },
+    // 初始化
+    async init() {
+      // 假设blogInfo已经在data中定义
+      if (this.blogInfo && this.blogInfo.websiteConfig) {
+        document.title = this.blogInfo.websiteConfig.websiteName;
+      }
+      // 使用async/await进行异步请求
+      this.axios.get("/api/talks/first").then(({data}) => {
+        this.initTyped(data.data);
+      });
+
+      // // 一言Api进行打字机循环输出效果
+      // fetch("https://v1.hitokoto.cn?c=i")
+      //   .then(res => {
+      //     return res.json();
+      //   })
+      //   .then(({hitokoto}) => {
+      //     this.initTyped(hitokoto);
+      //   });
+    },
+    listHomeTalks() {
+      this.axios.get("/api/home/talks").then(({data}) => {
+        this.talkList = data.data;
+      });
+    },
+    initTyped(input, fn, hooks) {
+      const obj = this.obj;
+      // eslint-disable-next-line no-unused-vars
+      const typed = new EasyTyper(obj, input, fn, hooks);
+    },
+    scrollDown() {
+      window.scrollTo({
+        behavior: "smooth",
+        top: document.documentElement.clientHeight
+      });
+    },
+    runTime() {
+      var timeold =
+          new Date().getTime() -
+          new Date(this.blogInfo.websiteConfig.websiteCreateTime).getTime();
+      var msPerDay = 24 * 60 * 60 * 1000;
+      var daysold = Math.floor(timeold / msPerDay);
+      var str = "";
+      var day = new Date();
+      str += daysold + "天";
+      str += day.getHours() + "时";
+      str += day.getMinutes() + "分";
+      str += day.getSeconds() + "秒";
+      this.time = str;
+    },
+    // async initMoyuPic() {
+    //   await this.axios
+    //       .get("https://api.vvhan.com/api/moyu", {
+    //         params: {
+    //         type: "json"
+    //         }
+    //       })
+    //       .then(({data}) => {
+    //         this.moyuPic = data.url;
+    //       });
+    // },
+    preview() {
+      let pic_images = [this.moyuPic];
+      this.$imagePreview({
+        showIndex: true,
+        loop: false,
+        images: pic_images,
+        index: 0
+      });
+    },
+    infiniteHandler($state) {
+      this.axios
+          .get("/api/articles", {
+            params: {
+              current: this.current
+            }
+          })
+          .then(({data}) => {
+            if (data.data.length) {
+              // 去除markdown标签
+              data.data.forEach(item => {
+                item.articleContent = md
+                    .render(item.articleContent)
+                    .replace(/<\/?[^>]*>/g, "")
+                    .replace(/[|]*\n/, "")
+                    .replace(/&npsp;/gi, "");
+              });
+              this.articleList.push(...data.data);
+              this.current++;
+              $state.loaded();
+            } else {
+              $state.complete();
+            }
+          });
+    }
+
+  },
+  metaInfo: {
+    meta: [{
+      name: "keyWords",
+      content: "超伟博客,开源博客,www.macw.cc"  //变量或字符串
+    }, {
+      name: "description",
+      content: "一个专注于技术分享的博客平台,大家以共同学习,乐于分享,拥抱开源的价值观进行学习交流"
+    }]
+  },
+  mounted: async function () {
+    // 设置配置信息
+    window.WIDGET = {
+      CONFIG: {
+        layout: "2",
+        width: 230,
+        height: 300,
+        background: "2",
+        dataColor: "000000",
+        borderRadius: "5",
+        city: "CN101180101",
+        key: "4034255d0cc94897b5f745367ccb81f2"
+      }
+    };
+
+    // 异步加载脚本
+    let script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "https://widget.qweather.net/standard/static/js/he-standard-common.js?v=2.0";
+    script.async = true; // 设置async属性
+
+    // 监听加载完成事件
+    script.onload = function () {
+      // 脚本加载完成后执行的代码，如果有需要的话
+      console.log('QWeather script loaded');
+    };
+
+    // 错误处理
+    script.onerror = function (error) {
+      console.error('QWeather script loading failed:', error);
+    };
+
+    // 将脚本添加到head中
+    document.getElementsByTagName("head")[0].appendChild(script);
+  },
+  computed: {
+    isRight() {
+      return function (index) {
+        if (index % 2 == 0) {
+          return "article-cover left-radius";
+        }
+        return "article-cover right-radius";
+      };
+    },
+    blogInfo() {
+      return this.$store.state.blogInfo;
+    },
+    isShowSocial() {
+      return function (social) {
+        var list = this.blogInfo.websiteConfig.socialUrlList;
+        return list && list.indexOf(social) != -1;
+      };
+    },
+    cover() {
+      var cover = "";
+      this.$store.state.blogInfo.pageList.forEach(item => {
+        if (item.pageLabel == "home") {
+          cover = item.pageCover;
+        }
+      });
+      return "background: url(" + cover + ") center center / cover no-repeat";
+    }
+  }
+};
+</script>
+
+<style lang="stylus">
+.typed-cursor
+  opacity: 1
+  animation: blink 0.7s infinite
+
+@keyframes blink
+  0%
+    opacity: 1
+  50%
+    opacity: 0
+  100%
+    opacity: 1
+<style>
+.clawdchat-sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 16px 12px;
+}
+.clawdchat-sidebar-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  margin-right: 12px;
+  object-fit: cover;
+}
+.clawdchat-sidebar-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+.clawdchat-sidebar-sub {
+  font-size: 12px;
+  color: #999;
+  margin-top: 1px;
+}
+.clawdchat-sidebar-divider {
+  height: 1px;
+  background: #eee;
+  margin: 0 16px;
+}
+.clawdchat-sidebar-posts {
+  padding: 10px 16px 0;
+}
+.clawdchat-sidebar-post {
+  padding: 8px 0;
+  border-bottom: 1px dashed #f0f0f0;
+}
+.clawdchat-sidebar-post:last-child {
+  border-bottom: none;
+}
+.clawdchat-sidebar-post a {
+  font-size: 13px;
+  color: #555;
+  text-decoration: none;
+  line-height: 1.6;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.clawdchat-sidebar-post a:hover {
+  color: #49b1f5;
+}
+.clawdchat-sidebar-more {
+  display: block;
+  text-align: center;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #49b1f5;
+  text-decoration: none;
+  border-top: 1px dashed #f0f0f0;
+  transition: color 0.2s;
+}
+.clawdchat-sidebar-more:hover {
+  color: #ff7242;
+}
+.theme--dark .clawdchat-sidebar-title,
+.theme--dark .clawdchat-sidebar-post a {
+  color: rgba(255, 255, 255, 0.87);
+}
+.theme--dark .clawdchat-sidebar-divider {
+  background: rgba(255, 255, 255, 0.12);
+}
+.theme--dark .clawdchat-sidebar-post {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+.theme--dark .clawdchat-sidebar-more {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+</style>

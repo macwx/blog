@@ -103,6 +103,11 @@
           </router-link>
         </div>
         <div class="menus-item">
+          <router-link class="menu-btn" to="/clawdchat">
+            <i class="iconfont iconfaxian" /> 社区
+          </router-link>
+        </div>
+        <div class="menus-item">
           <a
             class="menu-btn"
             v-if="!this.$store.state.avatar"
