@@ -1,0 +1,117 @@
+# 配置端口
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 21600
+
+# 配置mysql数据库
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/blog?serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    username: your_db_username
+    password: your_db_password
+    hikari:
+      minimum-idle: 5
+      idle-timeout: 180000
+      maximum-pool-size: 10
+      auto-commit: true
+      pool-name: MyHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+  # redis配置
+  redis:
+    host: 127.0.0.1
+    port: 6379
+#    password: your_redis_password
+  # mq配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 3000
+  # es配置 若搜索模式为mysql可删除
+#  elasticsearch:
+#    rest:
+#      uris: your_ip:9200
+  # 邮箱配置
+  mail:
+    host: smtp.qq.com
+    username: your_email@qq.com
+    password: your_email_auth_code
+    default-encoding: UTF-8
+    port: 465
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+            port: 465
+  # 上传图片大小限制
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+# 配置MybatisPlus
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+
+# 搜索模式 可选 elasticsearch或mysql
+search:
+  mode: mysql
+
+# 上传模式 可选 oss或local  （http://和最后的/一定不能去！！！）
+upload:
+  mode: local
+  local:
+    url: http://localhost:83/
+    path: /usr/local/upload/
+  oss:
+    url: https://your-bucket.oss-cn-beijing.aliyuncs.com/
+    endpoint: oss-cn-beijing.aliyuncs.com
+    accessKeyId: your_oss_access_key_id
+    accessKeySecret: your_oss_access_key_secret
+    bucketName: your_bucket_name
+  cos:
+    url: http://your-bucket.cos-url.com/
+    secretId: your_cos_secret_id
+    secretKey: your_cos_secret_key
+    region: your_cos_region
+    bucketName: your_bucket_name
+
+# 网站前台域名（邮件通知用）
+website:
+  url: http://localhost:8080
+
+# 第三方配置信息
+qq:
+  app-id: your_qq_app_id
+  check-token-url: https://graph.qq.com/oauth2.0/me?access_token={access_token}
+  user-info-url: https://graph.qq.com/user/get_user_info?openid={openid}&access_token={access_token}&oauth_consumer_key={oauth_consumer_key}
+
+weibo:
+  app-id: your_weibo_app_id
+  app-secret: your_weibo_app_secret
+  grant-type: authorization_code
+  redirect-url: your_weibo_redirect_url
+  access-token-url: https://api.weibo.com/oauth2/access_token
+  user-info-url: https://api.weibo.com/2/users/show.json?uid={uid}&access_token={access_token}
+
+baidu:
+  url: http://data.zz.baidu.com/urls?site=your_site&token=your_baidu_token
