@@ -21,13 +21,13 @@
           </button>
         </div>
       </div>
-      <!-- TODO: Vue3 migration - vue-baberrage removed -->
+      <!-- 弹幕列表 -->
       <div class="barrage-container">
         <div
           v-for="(item, index) in barrageList"
           :key="index"
           class="barrage-items"
-          style="margin: 8px auto; max-width: 400px"
+          :style="barrageStyle(index, item)"
         >
           <img
             :src="item.avatar"
@@ -36,7 +36,7 @@
             style="border-radius:50%"
           />
           <span class="ml-2">{{ item.nickname }} :</span>
-          <span class="ml-2">{{ item.messageContent }}</span>
+          <span class="ml-2 barrage-text">{{ item.messageContent }}</span>
         </div>
       </div>
     </div>
@@ -102,6 +102,26 @@ const cover = computed(() => {
   return "background: url(" + c + ") center center / cover no-repeat";
 });
 
+// 确定性伪随机：同一条留言每次渲染位置、速度保持一致，避免跳动
+function pseudoRandom(seed) {
+  const x = Math.sin(seed * 999) * 10000;
+  return x - Math.floor(x);
+}
+
+// 10 条泳道循环使用；keyframes 里飞行段只占 8.5%，其余时间停在屏幕外，
+// 保证 123 条留言同时只有 ~10 条在屏上（与原 vue-baberrage 的泳道效果一致）
+function barrageStyle(index, item) {
+  const lane = index % 10;
+  const top = 4 + lane * 9 + pseudoRandom(index + 1) * 3;
+  const duration = item.time || Math.floor(pseudoRandom(index + 101) * 3) + 7;
+  const delay = (index % 12) * 1.1 + pseudoRandom(index + 201) * 2;
+  return {
+    top: top + "%",
+    animationDuration: duration * 12 + "s",
+    animationDelay: delay + "s"
+  };
+}
+
 onMounted(() => {
   listMessage();
 });
@@ -163,15 +183,39 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  height: calc(100% -50px);
-  width: 100%;
+  overflow: hidden;
 }
 .barrage-items {
+  position: absolute;
+  left: 100%;
+  max-width: 26em;
+  white-space: nowrap;
   background: rgb(0, 0, 0, 0.7);
   border-radius: 100px;
   color: #fff;
   padding: 5px 10px 5px 5px;
   align-items: center;
   display: flex;
+  animation-name: barrage-move;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.barrage-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@keyframes barrage-move {
+  0% {
+    transform: translateX(0);
+  }
+  8.5% {
+    transform: translateX(calc(-100vw - 100%));
+  }
+  100% {
+    transform: translateX(calc(-100vw - 100%));
+  }
 }
 </style>
