@@ -200,7 +200,10 @@ function logout() {
 }
 
 onMounted(() => {
-  window.addEventListener("scroll", scroll);
+  // 初始化导航栏状态：刷新时浏览器可能恢复滚动位置但不再触发 scroll 事件，
+  // 且留言板等满屏页面窗口无法滚动，必须主动算一次初始值
+  scroll();
+  window.addEventListener("scroll", scroll, { passive: true });
 });
 
 onUnmounted(() => {
@@ -247,29 +250,29 @@ i {
 .v-toolbar .blog-title a {
   color: #eee !important;
 }
-.v-toolbar .nav-fixed {
+.v-toolbar.nav-fixed{
   background: rgba(255, 255, 255, 0.95) !important;
   box-shadow: 0 5px 6px -5px rgba(133, 133, 133, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
-.v-theme--dark .v-toolbar .nav-fixed {
+.v-theme--dark .v-toolbar.nav-fixed{
   background: rgba(18, 18, 18, 0.95) !important;
 }
-.v-theme--dark .v-toolbar .nav-fixed a {
+.v-theme--dark .v-toolbar.nav-fixed a {
   color: rgba(255, 255, 255, 0.8) !important;
 }
-.v-toolbar .nav-fixed .blog-title a,
+.v-toolbar.nav-fixed .blog-title a,
 .v-app-bar.nav-fixed .blog-title a {
   color: #4c4948 !important;
 }
-.v-toolbar .nav-fixed .menu-btn,
+.v-toolbar.nav-fixed .menu-btn,
 .v-app-bar.nav-fixed .menus-item .menu-btn,
 .v-app-bar.nav-fixed .menus-item > a,
 .v-app-bar.nav-fixed .nav-title a {
   color: #4c4948 !important;
 }
-.v-toolbar .nav-fixed .menu-btn:hover,
+.v-toolbar.nav-fixed .menu-btn:hover,
 .v-app-bar.nav-fixed .menus-item .menu-btn:hover,
 .v-app-bar.nav-fixed .menus-item > a:hover,
 .v-app-bar.nav-fixed .nav-title a:hover {
@@ -284,7 +287,7 @@ i {
   color: #eee !important;
   transition: all 0.2s;
 }
-.v-toolbar .nav-fixed .menus-item > a,
+.v-toolbar.nav-fixed .menus-item > a,
 .v-app-bar.nav-fixed .menus-item > a {
   color: #4c4948 !important;
 }
