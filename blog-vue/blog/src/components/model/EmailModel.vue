@@ -47,6 +47,7 @@ import axios from "axios";
 import { useBlogStore } from "@/store";
 import { useToast } from "@/components/toast/useToast";
 import config from "@/assets/js/config";
+import { loadTencentCaptcha } from "@/utils/thirdPartySdk";
 
 const store = useBlogStore();
 const { toast } = useToast();
@@ -79,26 +80,27 @@ watch(email, (value) => {
 });
 
 function sendCode() {
-  // eslint-disable-next-line no-undef
-  var captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, function (res) {
-    if (res.ret === 0) {
-      //发送邮件
-      countDown();
-      axios
-        .get("/api/users/code", {
-          params: { username: email.value },
-        })
-        .then(({ data }) => {
-          if (data.flag) {
-            toast({ type: "success", message: data.message });
-          } else {
-            toast({ type: "error", message: data.message });
-          }
-        });
-    }
+  loadTencentCaptcha().then(() => {
+    var captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, function (res) {
+      if (res.ret === 0) {
+        //发送邮件
+        countDown();
+        axios
+          .get("/api/users/code", {
+            params: { username: email.value },
+          })
+          .then(({ data }) => {
+            if (data.flag) {
+              toast({ type: "success", message: data.message });
+            } else {
+              toast({ type: "error", message: data.message });
+            }
+          });
+      }
+    });
+    // 显示验证码
+    captcha.show();
   });
-  // 显示验证码
-  captcha.show();
 }
 
 function countDown() {

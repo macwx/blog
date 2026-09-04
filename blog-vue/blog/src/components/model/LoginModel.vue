@@ -70,6 +70,7 @@ import axios from "axios";
 import { useBlogStore } from "@/store";
 import { useToast } from "@/components/toast/useToast";
 import config from "@/assets/js/config";
+import { loadQQSdk, loadTencentCaptcha } from "@/utils/thirdPartySdk";
 
 const store = useBlogStore();
 const router = useRouter();
@@ -122,28 +123,29 @@ function login() {
     toast({ type: "error", message: "密码不能为空" });
     return false;
   }
-  // eslint-disable-next-line no-undef
-  var captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, function (res) {
-    if (res.ret === 0) {
-      //发送登录请求
-      let param = new URLSearchParams();
-      param.append("username", username.value);
-      param.append("password", password.value);
-      axios.post("/api/login", param).then(({ data }) => {
-        if (data.flag) {
-          username.value = "";
-          password.value = "";
-          store.login(data.data);
-          store.closeModel();
-          toast({ type: "success", message: "登录成功" });
-        } else {
-          toast({ type: "error", message: data.message });
-        }
-      });
-    }
+  loadTencentCaptcha().then(() => {
+    var captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, function (res) {
+      if (res.ret === 0) {
+        //发送登录请求
+        let param = new URLSearchParams();
+        param.append("username", username.value);
+        param.append("password", password.value);
+        axios.post("/api/login", param).then(({ data }) => {
+          if (data.flag) {
+            username.value = "";
+            password.value = "";
+            store.login(data.data);
+            store.closeModel();
+            toast({ type: "success", message: "登录成功" });
+          } else {
+            toast({ type: "error", message: data.message });
+          }
+        });
+      }
+    });
+    // 显示验证码
+    captcha.show();
   });
-  // 显示验证码
-  captcha.show();
 }
 
 function qqLogin() {
@@ -154,10 +156,12 @@ function qqLogin() {
       /(iPhone|iPod|Android|ios|iOS|iPad|Backerry|WebOS|Symbian|Windows Phone|Phone)/i
     )
   ) {
-    // eslint-disable-next-line no-undef
-    QC.Login.showPopup({
-      appId: config.QQ_APP_ID,
-      redirectURI: config.QQ_REDIRECT_URI,
+    loadQQSdk().then(() => {
+      // eslint-disable-next-line no-undef
+      QC.Login.showPopup({
+        appId: config.QQ_APP_ID,
+        redirectURI: config.QQ_REDIRECT_URI,
+      });
     });
   } else {
     window.open(

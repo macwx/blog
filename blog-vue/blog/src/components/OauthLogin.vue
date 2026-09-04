@@ -17,6 +17,7 @@ import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import { useBlogStore } from "@/store";
 import { useToast } from "@/components/toast/useToast";
+import { loadQQSdk } from "@/utils/thirdPartySdk";
 
 const store = useBlogStore();
 const router = useRouter();
@@ -28,33 +29,36 @@ onMounted(() => {
   store.loginFlag = false;
   //通过路径判断是微博登录还是qq登录
   if (route.path == "/oauth/login/qq") {
-    // 拿到openId，accessToken传入后台
-    if (QC.Login.check()) {
-      QC.Login.getMe(function(openId, accessToken) {
-        axios
-          .post("/api/users/oauth/qq", {
-            openId: openId,
-            accessToken: accessToken
-          })
-          .then(({ data }) => {
-            if (data.flag) {
-              store.login(data.data);
-              if (data.data.email == null) {
-                toast({
-                  type: "warnning",
-                  message: "请绑定邮箱以便及时收到回复"
-                });
+    // QQ 回调页才按需加载 QQ 互联 SDK
+    loadQQSdk().then(() => {
+      // 拿到openId，accessToken传入后台
+      if (QC.Login.check()) {
+        QC.Login.getMe(function(openId, accessToken) {
+          axios
+            .post("/api/users/oauth/qq", {
+              openId: openId,
+              accessToken: accessToken
+            })
+            .then(({ data }) => {
+              if (data.flag) {
+                store.login(data.data);
+                if (data.data.email == null) {
+                  toast({
+                    type: "warnning",
+                    message: "请绑定邮箱以便及时收到回复"
+                  });
+                } else {
+                  toast({ type: "success", message: data.message });
+                }
               } else {
-                toast({ type: "success", message: data.message });
+                toast({ type: "error", message: data.message });
               }
-            } else {
-              toast({ type: "error", message: data.message });
-            }
-          });
-      });
-    } else {
-      toast({ type: "error", message: "QQ登录验证失败" });
-    }
+            });
+        });
+      } else {
+        toast({ type: "error", message: "QQ登录验证失败" });
+      }
+    });
   } else {
     axios
       .post("/api/users/oauth/weibo", { code: route.query.code })
